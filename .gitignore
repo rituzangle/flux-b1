@@ -1,0 +1,79 @@
+# Loree-v6 Git Ignore
+# Comprehensive ignore file for React Native + Expo + Security
+.env
+*.txt
+*prompt*
+docs/*bolt*
+docs/*prompt*
+tmp
+# breadcrumbs and dotfiles
+
+claud-convos/
+pdfs/
+
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Expo
+.expo
+.expo/
+ios/
+android/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# macOS
+.DS_Store
+*.pem
+
+# Local env files
+.env*.local
+.env
+.env.production
+
+# Decrypted files (keep encrypted versions)
+*.decrypted
+
+# Logs and temporary files
+logs/*.log
+tmp/*
+*.tmp
+*.temp
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Audio processing temporary files
+*.pcm
+*.raw
+audio-clips/
+ml-models/temp/
+
+# Encryption keys (except master key which is in config/)
+*.key
+!config/encryption/master.key
+
+# Build artifacts
+build/
+*.tgz
+
+# Testing
+coverage/
+.nyc_output/
+
+# Misc
+*.swp
+*.swo

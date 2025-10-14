@@ -1,0 +1,38 @@
+import { HTMLAttributes, forwardRef } from 'react';
+import { CardVariant } from '@/utils/types';
+
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  variant?: CardVariant;
+  selected?: boolean;
+}
+
+const Card = forwardRef<HTMLDivElement, CardProps>(
+  ({ variant = 'default', selected = false, className = '', children, ...props }, ref) => {
+    const baseClasses = 'rounded-lg p-6 transition-all duration-200';
+
+    const variantClasses = {
+      default: 'bg-white border border-border-default shadow-sm',
+      elevated: 'bg-white shadow-md hover:shadow-lg',
+      selectable: `bg-white border-2 cursor-pointer ${
+        selected
+          ? 'border-border-selected bg-blue-50'
+          : 'border-border-default hover:border-blue-300 hover:shadow-md'
+      }`,
+      glass: 'bg-background-glass backdrop-blur-md shadow-glass border border-border-default',
+    };
+
+    return (
+      <div
+        ref={ref}
+        className={`${baseClasses} ${variantClasses[variant]} ${className}`}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
+);
+
+Card.displayName = 'Card';
+
+export default Card;
