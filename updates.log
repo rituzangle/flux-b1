@@ -1,0 +1,351 @@
+
+📌 Suggested Import Replacements:
+
+File: app/RedirectToOnboarding.tsx
+Line 10:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/RedirectToOnboarding.tsx
+
+File: app/api/charities/route.ts
+Line 5:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/api/charities/route.ts
+
+File: app/api/donate/route.ts
+Line 12:
+  ❌ import { mockCharities } from '@/mocks/charities';
+  ✅ import { mockCharities } from '@/src/mocks/charities';
+  code /home/project/app/api/donate/route.ts
+
+File: app/api/donate/route.ts
+Line 13:
+  ❌ import { generateDynamicInsights } from '@/utils/insightGenerator';
+  ✅ import { generateDynamicInsights } from '@/src/utils/insightGenerator';
+  code /home/project/app/api/donate/route.ts
+
+File: app/api/donate/route.ts
+Line 14:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/api/donate/route.ts
+
+File: app/dashboard/page.tsx
+Line 2:
+  ❌ import BalanceCard from '@/components/dashboard/BalanceCard';
+  ✅ import BalanceCard from '@/src/components/dashboard/BalanceCard';
+  code /home/project/app/dashboard/page.tsx
+
+File: app/dashboard/page.tsx
+Line 3:
+  ❌ import QuickActions from '@/components/dashboard/QuickActions';
+  ✅ import QuickActions from '@/src/components/dashboard/QuickActions';
+  code /home/project/app/dashboard/page.tsx
+
+File: app/dashboard/page.tsx
+Line 4:
+  ❌ import RecentActivity from '@/components/dashboard/RecentActivity';
+  ✅ import RecentActivity from '@/src/components/dashboard/RecentActivity';
+  code /home/project/app/dashboard/page.tsx
+
+File: app/history/page.tsx
+Line 9:
+  ❌ import { getTransactions } from '@/utils/api';
+  ✅ import { getTransactions } from '@/src/utils/api';
+  code /home/project/app/history/page.tsx
+
+File: app/history/page.tsx
+Line 10:
+  ❌ import { Transaction } from '@/utils/types';
+  ✅ import { Transaction } from '@/src/utils/types';
+  code /home/project/app/history/page.tsx
+
+File: app/history/page.tsx
+Line 11:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/history/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 11:
+  ❌ import { getCharities, processDonation } from '@/utils/api';
+  ✅ import { getCharities, processDonation } from '@/src/utils/api';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 12:
+  ❌ import { Charity } from '@/utils/types';
+  ✅ import { Charity } from '@/src/utils/types';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 13:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 14:
+  ❌ import ProgressIndicator from '@/components/ui/ProgressIndicator';
+  ✅ import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 15:
+  ❌ import AmountSelector from '@/components/onboarding/AmountSelector';
+  ✅ import AmountSelector from '@/src/components/onboarding/AmountSelector';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 16:
+  ❌ import TransparencyBreakdown from '@/components/onboarding/TransparencyBreakdown';
+  ✅ import TransparencyBreakdown from '@/src/components/onboarding/TransparencyBreakdown';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 17:
+  ❌ import ImpactPreview from '@/components/onboarding/ImpactPreview';
+  ✅ import ImpactPreview from '@/src/components/onboarding/ImpactPreview';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/amount/page.tsx
+Line 18:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/app/onboarding/amount/page.tsx
+
+File: app/onboarding/page.tsx
+Line 10:
+  ❌ import { getCharities } from '@/utils/api';
+  ✅ import { getCharities } from '@/src/utils/api';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/page.tsx
+Line 11:
+  ❌ import { Charity } from '@/utils/types';
+  ✅ import { Charity } from '@/src/utils/types';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/page.tsx
+Line 12:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/page.tsx
+Line 13:
+  ❌ import ProgressIndicator from '@/components/ui/ProgressIndicator';
+  ✅ import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/page.tsx
+Line 14:
+  ❌ import CharityCard from '@/components/onboarding/CharityCard';
+  ✅ import CharityCard from '@/src/components/onboarding/CharityCard';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/page.tsx
+Line 15:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/app/onboarding/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 10:
+  ❌ import { updateUserProfile } from '@/utils/api';
+  ✅ import { updateUserProfile } from '@/src/utils/api';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 11:
+  ❌ import { DonationResult } from '@/utils/types';
+  ✅ import { DonationResult } from '@/src/utils/types';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 12:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 13:
+  ❌ import ProgressIndicator from '@/components/ui/ProgressIndicator';
+  ✅ import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 14:
+  ❌ import AIInsightCard from '@/components/onboarding/AIInsightCard';
+  ✅ import AIInsightCard from '@/src/components/onboarding/AIInsightCard';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/onboarding/success/page.tsx
+Line 15:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/app/onboarding/success/page.tsx
+
+File: app/page.tsx
+Line 15:
+  ❌ import { fetchUser } from '@/utils/api';
+  ✅ import { fetchUser } from '@/src/utils/api';
+  code /home/project/app/page.tsx
+
+File: app/page.tsx
+Line 16:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/page.tsx
+
+File: app/send/page.tsx
+Line 10:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/send/page.tsx
+
+File: app/send/page.tsx
+Line 11:
+  ❌ import Input from '@/components/ui/Input';
+  ✅ import Input from '@/src/components/ui/Input';
+  code /home/project/app/send/page.tsx
+
+File: app/send/page.tsx
+Line 12:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/app/send/page.tsx
+
+File: app/send/page.tsx
+Line 13:
+  ❌ import Card from '@/components/ui/Card';
+  ✅ import Card from '@/src/components/ui/Card';
+  code /home/project/app/send/page.tsx
+
+File: app/settings/page.tsx
+Line 9:
+  ❌ import { getUserProfile } from '@/utils/api';
+  ✅ import { getUserProfile } from '@/src/utils/api';
+  code /home/project/app/settings/page.tsx
+
+File: app/settings/page.tsx
+Line 10:
+  ❌ import { User } from '@/utils/types';
+  ✅ import { User } from '@/src/utils/types';
+  code /home/project/app/settings/page.tsx
+
+File: app/settings/page.tsx
+Line 11:
+  ❌ import { logger } from '@/utils/prettyLogs';
+  ✅ import { logger } from '@/src/utils/prettyLogs';
+  code /home/project/app/settings/page.tsx
+
+File: app/settings/page.tsx
+Line 12:
+  ❌ import Card from '@/components/ui/Card';
+  ✅ import Card from '@/src/components/ui/Card';
+  code /home/project/app/settings/page.tsx
+
+File: src/components/dashboard/BalanceCard.tsx
+Line 3:
+  ❌ import Card from '@/components/ui/Card';
+  ✅ import Card from '@/src/components/ui/Card';
+  code /home/project/src/components/dashboard/BalanceCard.tsx
+
+File: src/components/dashboard/RecentActivity.tsx
+Line 1:
+  ❌ import { Transaction } from '@/utils/types';
+  ✅ import { Transaction } from '@/src/utils/types';
+  code /home/project/src/components/dashboard/RecentActivity.tsx
+
+File: src/components/onboarding/AIInsightCard.tsx
+Line 1:
+  ❌ import { AIInsight } from '@/utils/types';
+  ✅ import { AIInsight } from '@/src/utils/types';
+  code /home/project/src/components/onboarding/AIInsightCard.tsx
+
+File: src/components/onboarding/AIInsightCard.tsx
+Line 2:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/src/components/onboarding/AIInsightCard.tsx
+
+File: src/components/onboarding/AmountSelector.tsx
+Line 4:
+  ❌ import Button from '@/components/ui/Button';
+  ✅ import Button from '@/src/components/ui/Button';
+  code /home/project/src/components/onboarding/AmountSelector.tsx
+
+File: src/components/onboarding/AmountSelector.tsx
+Line 5:
+  ❌ import Input from '@/components/ui/Input';
+  ✅ import Input from '@/src/components/ui/Input';
+  code /home/project/src/components/onboarding/AmountSelector.tsx
+
+File: src/components/onboarding/CharityCard.tsx
+Line 1:
+  ❌ import { Charity } from '@/utils/types';
+  ✅ import { Charity } from '@/src/utils/types';
+  code /home/project/src/components/onboarding/CharityCard.tsx
+
+File: src/components/onboarding/CharityCard.tsx
+Line 2:
+  ❌ import Card from '@/components/ui/Card';
+  ✅ import Card from '@/src/components/ui/Card';
+  code /home/project/src/components/onboarding/CharityCard.tsx
+
+File: src/components/onboarding/ImpactPreview.tsx
+Line 4:
+  ❌ import { Charity } from '@/utils/types';
+  ✅ import { Charity } from '@/src/utils/types';
+  code /home/project/src/components/onboarding/ImpactPreview.tsx
+
+File: src/components/onboarding/TransparencyBreakdown.tsx
+Line 1:
+  ❌ import Card from '@/components/ui/Card';
+  ✅ import Card from '@/src/components/ui/Card';
+  code /home/project/src/components/onboarding/TransparencyBreakdown.tsx
+
+File: src/components/ui/Button.tsx
+Line 2:
+  ❌ import { ButtonVariant } from '@/utils/types';
+  ✅ import { ButtonVariant } from '@/src/utils/types';
+  code /home/project/src/components/ui/Button.tsx
+
+File: src/components/ui/Card.tsx
+Line 2:
+  ❌ import { CardVariant } from '@/utils/types';
+  ✅ import { CardVariant } from '@/src/utils/types';
+  code /home/project/src/components/ui/Card.tsx
+
+File: src/mocks/charities.ts
+Line 2:
+  ❌ import { Charity } from '@/utils/types';
+  ✅ import { Charity } from '@/src/utils/types';
+  code /home/project/src/mocks/charities.ts
+
+File: src/mocks/donations.ts
+Line 1:
+  ❌ import { AIInsight, Charity } from '@/utils/types';
+  ✅ import { AIInsight, Charity } from '@/src/utils/types';
+  code /home/project/src/mocks/donations.ts
+
+File: src/mocks/transactions.ts
+Line 1:
+  ❌ import { Transaction } from '@/utils/types';
+  ✅ import { Transaction } from '@/src/utils/types';
+  code /home/project/src/mocks/transactions.ts
+
+File: src/mocks/user.ts
+Line 10:
+  ❌ import type { User } from '@/utils/types';
+  ✅ import type { User } from '@/src/utils/types';
+  code /home/project/src/mocks/user.ts
+
+File: src/utils/tokens.ts
+Line 15:
+  ❌ * import { tokens } from '@/utils/tokens';
+  ✅ * import { tokens } from '@/src/utils/tokens';
+  code /home/project/src/utils/tokens.ts
+
