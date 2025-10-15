@@ -1,1 +1,2 @@
-"node -e 'console.log(new Date().toString())'"
+node -e 'console.log(new Date().toString())'
+
