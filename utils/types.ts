@@ -54,5 +54,5 @@ export interface Transaction {
 }
 
 export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'disabled';
-export type CardVariant = 'default' | 'elevated' | 'selectable' | 'glass';
-export type WWPromptMode = 'prominent' | 'subtle' | 'hidden';
+export type CardVariant   = 'default' | 'elevated' | 'selectable' | 'glass';
+export type WWPromptMode  = 'prominent' | 'subtle' | 'hidden';
