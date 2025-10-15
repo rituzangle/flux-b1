@@ -56,7 +56,7 @@ results.forEach(({ file, line, original, replacement }) => {
   console.log(`Line ${line}:`);
   console.log(`  ❌ ${original}`);
   console.log(`  ✅ ${replacement}`);
-  console.log(`  💡 Open in IDE: code ${path.resolve(file)}\n`);
+  console.log(`  code ${path.resolve(file)}\n`);
 });
 /**
 node  move-utils-mocks.js
