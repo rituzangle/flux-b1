@@ -96,8 +96,8 @@ export const mockCharities: Charity[] = [
   },
   {
   id: 'charity-8',
-  name: 'Giving Tree',
-  description: 'Holiday gifts for children in need',
+  name: 'Family Giving Tree',
+  description: 'Bringing Joy. Growing Hope. Creating Community.',
   logoUrl: '/logos/giving-tree.png',
   website: 'https://familygivingtree.org/',
   emoji: '🎁',
