@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "date": "",
+    "date": "node -e 'console.log(new Date().toString())'",
     "clean": "clear;rm -rf package-lock.json .next node_modules && npm install && npm run dev",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
