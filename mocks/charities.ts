@@ -71,6 +71,7 @@ export const mockCharities: Charity[] = [
     name: 'Children International',
     description: 'Breaking the cycle of poverty for children',
     logoUrl: '/logos/Children-International-logo.png',
+    website: 'https://www.children.org/',
     emoji: '🌟',
     verified: true,
     donorCount: 198234,
