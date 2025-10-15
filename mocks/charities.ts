@@ -1,3 +1,4 @@
+mocks/charities.ts
 import { Charity } from '@/utils/types';
 
 export const mockCharities: Charity[] = [
