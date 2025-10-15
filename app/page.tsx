@@ -1,28 +1,15 @@
 /**
  * app/page.tsx
  * Home page component for the Flux application.
- * Entry point for authenticated users.
+ * Shows welcome message and triggers onboarding redirect via Suspense.
  */
-'use client';
 
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { logger } from '@/utils/prettyLogs';
+import { Suspense } from 'react';
+import RedirectToOnboarding from './RedirectToOnboarding';
 
 export const dynamic = 'force-dynamic';
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    logger.info('Redirecting to onboarding in 3 seconds', 'HomePage');
-    const timer = setTimeout(() => {
-      router.push('/onboarding');
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
   return (
     <main className="min-h-screen bg-background-primary">
       <div className="container mx-auto px-md py-xl">
@@ -36,6 +23,9 @@ export default function Home() {
           Redirecting to onboarding...
         </p>
       </div>
+      <Suspense fallback={null}>
+        <RedirectToOnboarding />
+      </Suspense>
     </main>
   );
 }
