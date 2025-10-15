@@ -2,7 +2,7 @@ import { User } from '@/utils/types';
 
 export const mockUser: User = {
   id: 'user-1',
-  name: 'Alex Rivera',
+  name: 'Alex Maigret',
   email: 'alex@example.com',
   balance: 1250.00,
   hasCompletedOnboarding: false,
