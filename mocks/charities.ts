@@ -49,6 +49,7 @@ export const mockCharities: Charity[] = [
     id: 'charity-5',
     name: 'Save the Children',
     description: 'Giving children a healthy start in life',
+    logo: '/logos/save-the-children.png',
     emoji: '🎈',
     verified: true,
     donorCount: 423876,
