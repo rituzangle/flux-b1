@@ -2,6 +2,8 @@ export interface Charity {
   id: string;
   name: string;
   description: string;
+  website: string | null;
+  logo: string;
   emoji: string;
   verified: boolean;
   donorCount: number;
