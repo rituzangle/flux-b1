@@ -494,3 +494,4 @@ export function formatRelativeDate(date: Date): string {
     day: 'numeric',
     year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
   });
+}
