@@ -46,9 +46,9 @@ export default function OnboardingPage() {
   };
 
   const handleSkip = () => {
-    logger.info('User skipped onboarding', 'OnboardingPage');
-    router.push('/donate');
-  };
+  logger.info('User skipped onboarding, redirecting to /donate', 'OnboardingPage');
+  router.push('/donate');
+};
 
   if (loading) {
     return (
