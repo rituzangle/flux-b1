@@ -97,3 +97,4 @@ function getImpactNarrative(metric: string, count: number): string {
 
   const narrative = narratives[metric];
   return narrative ? narrative(count) : `You contributed ${count} ${metric}`;
+}
