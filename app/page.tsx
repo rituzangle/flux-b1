@@ -1,29 +1,12 @@
 /**
  * app/page.tsx
  * Home page component for the Flux application.
- * Shows welcome message, then redirects to onboarding.
+ * Entry point for authenticated users.
  */
 
-'use client';
-
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { logger } from '@/utils/prettyLogs';
-
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    logger.info('Redirecting to onboarding in 3 seconds', 'HomePage');
-    const timer = setTimeout(() => {
-      router.push('/onboarding');
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
   return (
     <main className="min-h-screen bg-background-primary">
       <div className="container mx-auto px-md py-xl">
@@ -33,10 +16,7 @@ export default function Home() {
         <p className="text-base text-text-secondary">
           Your Next.js application is running successfully.
         </p>
-        <p className="text-sm text-text-secondary mt-md">
-          Redirecting to onboarding...
-        </p>
       </div>
     </main>
-  );
+  )
 }
