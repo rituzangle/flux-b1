@@ -94,4 +94,18 @@ export const mockCharities: Charity[] = [
     impactRate: 0.5,
     category: 'humanitarian',
   },
+  {
+  id: 'charity-8',
+  name: 'Giving Tree',
+  description: 'Holiday gifts for children in need',
+  logoUrl: '/logos/giving-tree.png',
+  website: 'https://familygivingtree.org/',
+  emoji: '🎁',
+  verified: true,
+  donorCount: 0,
+  impactMetric: 'gift bundles',
+  impactRate: 1,
+  category: 'holiday',
+},
+
 ];
