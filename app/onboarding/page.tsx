@@ -37,13 +37,15 @@ export default function OnboardingPage() {
 
     loadCharities();
   }, []);
-
-  const handleContinue = () => {
-    if (selectedCharity) {
-      logger.info(`Navigating to amount selection for charity: ${selectedCharity}`, 'OnboardingPage');
-      router.push(`/onboarding/amount?charity=${selectedCharity}`);
-    }
-  };
+const handleContinue = () => {
+  if (selectedCharity) {
+    logger.info(`User selected charity: ${selectedCharity}`, 'OnboardingPage');
+    router.push(`/onboarding/amount?charity=${selectedCharity}`);
+  } else {
+    logger.info('No charity selected, redirecting to donate flow', 'OnboardingPage');
+    router.push('/donate');
+  }
+};
 
   const handleSkip = () => {
   logger.info('User skipped onboarding, redirecting to /donate', 'OnboardingPage');
