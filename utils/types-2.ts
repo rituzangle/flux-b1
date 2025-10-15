@@ -267,23 +267,17 @@ export type Transaction =
 export interface AIInsight {
   /** Insight icon (emoji or identifier) */
   icon: string;
-  
   /** Insight title/headline */
   title: string;
-  
   /** Insight value/metric */
   value: string;
-  
   /** Optional: Detailed description */
   description?: string;
-  
   /** Optional: Action button label */
   actionLabel?: string;
-  
   /** Optional: Action URL or handler */
   actionUrl?: string;
 }
-
 /**
  * Donation result (returned from API)
  */
