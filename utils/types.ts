@@ -3,7 +3,7 @@ export interface Charity {
   name: string;
   description: string;
   website: string | null;
-  logo: string;
+  logoUrl: string;
   emoji: string;
   verified: boolean;
   donorCount: number;
