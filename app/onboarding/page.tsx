@@ -14,7 +14,7 @@ import { logger } from '@/utils/prettyLogs';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import CharityCard from '@/components/onboarding/CharityCard';
 import Button from '@/components/ui/Button';
-
+export const dynamic = 'force-dynamic';
 export default function OnboardingPage() {
   const router = useRouter();
   const [charities, setCharities] = useState<Charity[]>([]);
