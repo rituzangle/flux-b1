@@ -1,3 +1,5 @@
+// components/dashboard/BalanceCard.tsx
+
 import Card from '@/components/ui/Card';
 
 interface BalanceCardProps {
