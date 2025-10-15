@@ -29,7 +29,7 @@ export const mockCharities: Charity[] = [
     id: 'charity-3',
     name: 'American Red Cross',
     description: 'Disaster relief and emergency assistance',
-    logo: '/logos/red-cross.png',
+    logo: '/logos/Red-Cross-logo.png',
     emoji: '❤️',
     verified: true,
     donorCount: 892014,
