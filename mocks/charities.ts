@@ -85,6 +85,6 @@ export const mockCharities: Charity[] = [
     donorCount: 898234,
     impactMetric: 'care packages',
     impactRate: 0.5,
-    category: 'children',
+    category: 'humanitarian',
   },
 ];
