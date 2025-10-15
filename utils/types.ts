@@ -23,7 +23,6 @@ export interface User {
   lastWWPromptShown: Date | null;
   wwPromptDismissedForPayday: boolean;
 }
-
 export interface AIInsight {
   icon: string;
   title: string;
