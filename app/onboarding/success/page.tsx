@@ -1,9 +1,15 @@
+/**
+ * app/onboarding/success/page.tsx
+ * Onboarding flow - Step 3: Success Screen with AI Insights
+ * Shows donation confirmation and AI-generated insights.
+ */
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { updateUserProfile } from '@/utils/api';
 import { DonationResult } from '@/utils/types';
+import { logger } from '@/utils/prettyLogs';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import AIInsightCard from '@/components/onboarding/AIInsightCard';
 import Button from '@/components/ui/Button';
@@ -19,9 +25,12 @@ function SuccessPageContent() {
 
   useEffect(() => {
     if (!txnId) {
+      logger.warn('No transaction ID provided, redirecting to onboarding', 'SuccessPage');
       router.push('/onboarding');
       return;
     }
+
+    logger.info(`Donation success page loaded for transaction: ${txnId}`, 'SuccessPage');
 
     const timer = setTimeout(() => setShowConfetti(false), 3000);
     return () => clearTimeout(timer);
@@ -29,11 +38,13 @@ function SuccessPageContent() {
 
   useEffect(() => {
     async function completeOnboarding() {
+      logger.info('Completing onboarding and generating AI insights', 'SuccessPage');
       try {
         await updateUserProfile({
           hasCompletedOnboarding: true,
           firstDonationDate: new Date(),
         });
+        logger.info('User profile updated successfully', 'SuccessPage');
 
         const mockDonationData: DonationResult = {
           success: true,
@@ -82,8 +93,10 @@ function SuccessPageContent() {
           ],
         };
 
+        logger.info('Generated AI insights for user', 'SuccessPage');
         setDonationData(mockDonationData);
       } catch (error) {
+        logger.error(`Failed to complete onboarding: ${error}`, 'SuccessPage');
         console.error('Failed to complete onboarding:', error);
       }
     }
@@ -92,6 +105,7 @@ function SuccessPageContent() {
   }, [txnId]);
 
   const handleExplore = () => {
+    logger.info('User navigating to main app', 'SuccessPage');
     router.push('/');
   };
 

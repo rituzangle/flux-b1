@@ -1,3 +1,11 @@
+/**
+ * app/onboarding/layout.tsx
+ * Layout wrapper for onboarding flow.
+ * Centers content and provides consistent spacing.
+ */
+
+export const dynamic = 'force-dynamic'
+
 export default function OnboardingLayout({
   children,
 }: {

@@ -1,7 +1,13 @@
+/**
+ * app/send/page.tsx
+ * Send Money Page
+ * Allows users to send money to other Flux users.
+ */
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { logger } from '@/utils/prettyLogs';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -19,20 +25,28 @@ export default function SendPage() {
     e.preventDefault();
     setError('');
 
+    logger.info(`Send money initiated: recipient=${recipient}, amount=${amount}`, 'SendPage');
+
     if (!recipient || !amount) {
-      setError('Please fill in all required fields');
+      const errorMsg = 'Please fill in all required fields';
+      logger.warn(errorMsg, 'SendPage');
+      setError(errorMsg);
       return;
     }
 
     const amountNum = parseFloat(amount);
     if (isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid amount');
+      const errorMsg = 'Please enter a valid amount';
+      logger.warn(errorMsg, 'SendPage');
+      setError(errorMsg);
       return;
     }
 
     setLoading(true);
+    logger.info(`Processing send: $${amountNum.toFixed(2)} to ${recipient}`, 'SendPage');
 
     setTimeout(() => {
+      logger.info('Send transaction completed successfully', 'SendPage');
       alert(`Sent $${amountNum.toFixed(2)} to ${recipient}`);
       router.push('/');
     }, 1500);

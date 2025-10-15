@@ -1,3 +1,8 @@
+/**
+ * app/onboarding/page.tsx
+ * Onboarding flow - Step 1: Charity Selection
+ * Allows users to select a charity to donate to during onboarding.
+ */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getCharities } from '@/utils/api';
 import { Charity } from '@/utils/types';
+import { logger } from '@/utils/prettyLogs';
 import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import CharityCard from '@/components/onboarding/CharityCard';
 import Button from '@/components/ui/Button';
@@ -17,10 +23,13 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     async function loadCharities() {
+      logger.info('Loading charities for onboarding', 'OnboardingPage');
       try {
         const data = await getCharities();
+        logger.info(`Loaded ${data.length} charities`, 'OnboardingPage');
         setCharities(data);
       } catch (error) {
+        logger.error(`Failed to load charities: ${error}`, 'OnboardingPage');
         console.error('Failed to load charities:', error);
       } finally {
         setLoading(false);
@@ -32,11 +41,13 @@ export default function OnboardingPage() {
 
   const handleContinue = () => {
     if (selectedCharity) {
+      logger.info(`Navigating to amount selection for charity: ${selectedCharity}`, 'OnboardingPage');
       router.push(`/onboarding/amount?charity=${selectedCharity}`);
     }
   };
 
   const handleSkip = () => {
+    logger.info('User skipped onboarding', 'OnboardingPage');
     router.push('/');
   };
 

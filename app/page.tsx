@@ -1,3 +1,11 @@
+/**
+ * app/page.tsx
+ * Home page component for the Flux application.
+ * Entry point for authenticated users.
+ */
+
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-background-primary">

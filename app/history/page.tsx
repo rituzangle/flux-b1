@@ -1,8 +1,14 @@
+/**
+ * app/history/page.tsx
+ * Transaction History Page
+ * Displays user's transaction history with filtering capabilities.
+ */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { getTransactions } from '@/utils/api';
 import { Transaction } from '@/utils/types';
+import { logger } from '@/utils/prettyLogs';
 import { ArrowUpRight, ArrowDownLeft, HandHeart } from 'lucide-react';
 
 export default function HistoryPage() {
@@ -12,10 +18,13 @@ export default function HistoryPage() {
 
   useEffect(() => {
     async function loadTransactions() {
+      logger.info('Loading transaction history', 'HistoryPage');
       try {
         const data = await getTransactions();
+        logger.info(`Loaded ${data.length} transactions`, 'HistoryPage');
         setTransactions(data);
       } catch (error) {
+        logger.error(`Failed to load transactions: ${error}`, 'HistoryPage');
         console.error('Failed to load transactions:', error);
       } finally {
         setLoading(false);
@@ -68,7 +77,10 @@ export default function HistoryPage() {
         {(['all', 'donation', 'send', 'receive'] as const).map((filterType) => (
           <button
             key={filterType}
-            onClick={() => setFilter(filterType)}
+            onClick={() => {
+              logger.debug(`Filter changed to: ${filterType}`, 'HistoryPage');
+              setFilter(filterType);
+            }}
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
               filter === filterType
                 ? 'bg-brand-primary text-white'

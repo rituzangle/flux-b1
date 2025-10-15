@@ -1,8 +1,14 @@
+/**
+ * app/settings/page.tsx
+ * Settings Page
+ * User profile and app settings management.
+ */
 'use client';
 
 import { useEffect, useState } from 'react';
 import { getUserProfile } from '@/utils/api';
 import { User } from '@/utils/types';
+import { logger } from '@/utils/prettyLogs';
 import Card from '@/components/ui/Card';
 import { User as UserIcon, Bell, Lock, HelpCircle, LogOut } from 'lucide-react';
 
@@ -12,10 +18,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     async function loadUser() {
+      logger.info('Loading user profile', 'SettingsPage');
       try {
         const userData = await getUserProfile();
+        logger.info(`Loaded user: ${userData.email}`, 'SettingsPage');
         setUser(userData);
       } catch (error) {
+        logger.error(`Failed to load user: ${error}`, 'SettingsPage');
         console.error('Failed to load user:', error);
       } finally {
         setLoading(false);
@@ -88,6 +97,7 @@ export default function SettingsPage() {
               <button
                 key={item.label}
                 className="w-full text-left"
+                onClick={() => logger.debug(`Settings option clicked: ${item.label}`, 'SettingsPage')}
               >
                 <Card className="hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-4">
@@ -111,7 +121,10 @@ export default function SettingsPage() {
         </div>
       ))}
 
-      <button className="w-full">
+      <button
+        className="w-full"
+        onClick={() => logger.info('User logged out', 'SettingsPage')}
+      >
         <Card className="hover:shadow-md transition-shadow border-brand-error">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
