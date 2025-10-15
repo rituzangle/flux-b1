@@ -18,6 +18,7 @@ export async function getCharities(): Promise<Charity[]> {
   if (USE_MOCK) {
     logger.debug('Using mock charities data', 'API');
     const { mockCharities } = await import('@/mocks/charities');
+      logger.debug(`Loaded mockCharities:\n${JSON.stringify(mockCharities, null, 2)}`, 'API');
     return mockCharities;
   }
 
