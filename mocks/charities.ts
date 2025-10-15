@@ -102,9 +102,9 @@ export const mockCharities: Charity[] = [
   website: 'https://familygivingtree.org/',
   emoji: '🎄',
   verified: true,
-  donorCount: 909,
+  donorCount: 998,
   impactMetric: 'gift bundles',
-  impactRate: 1,
+  impactRate: 0.5,
   category: 'holiday',
 },
 
