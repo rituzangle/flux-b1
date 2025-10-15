@@ -1,8 +1,6 @@
-/**
- * Donation Insight Generator
- * 
+/** 
  * @file utils/insightGenerator.ts
- * 
+ * Donation Insight Generator
  * Generates personalized AI insights from:
  * - Donation amount
  * - Charity impact metrics
