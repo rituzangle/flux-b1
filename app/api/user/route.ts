@@ -1,6 +1,8 @@
 /**
  * app/api/user/route.ts
  * Returns the current user's profile.
+
+ This will allow fetchUser() in utils/api.ts, to work as expected and return a single user profile object.
  */
 
 import { NextResponse } from 'next/server';
