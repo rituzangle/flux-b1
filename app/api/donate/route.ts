@@ -2,11 +2,10 @@
  * app/api/donate/route.ts
  * 
  * Donation processing endpoint
- * 
  * ✅ Uses dynamic insights (not hardcoded)
- * ✅ Uses actual charity data from mocks
+ * ✅ Uses mockCharities data (single source of truth for : list of charities)
  * ✅ Calculates impact from charity.impactRate
- * ✅ Returns AIInsight[] objects (not string array)
+ * ✅ Returns AIInsight[] objects
  */
 
 import { NextResponse } from 'next/server';
@@ -16,35 +15,29 @@ import { logger } from '@/utils/prettyLogs';
 
 interface DonateRequest {
   charityId: string;
-  amountInCents: number; // Amount in cents (e.g., 1000 = $10.00)
+  amountInCents: number; // e.g., 1000 = $10.00
 }
 
 export async function POST(req: Request) {
   try {
     const body: DonateRequest = await req.json();
-    logger.info(`Received donation: ${JSON.stringify(body)}`, 'DonateRoute');
+    logger.info(`Donate: Received ${body.amountInCents / 100} to ${body.charityId}`, 'DonateRoute');
 
-    // Validate inputs
+    // Validate
     if (!body.charityId || !body.amountInCents || body.amountInCents < 100) {
-      logger.warn(`Invalid donation amount: ${body.amountInCents}`, 'DonateRoute');
+      logger.warn('Donate: Invalid amount', 'DonateRoute');
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Invalid donation amount (minimum $1.00)',
-        },
+        { success: false, error: 'Invalid amount (minimum $1.00)' },
         { status: 400 }
       );
     }
 
-    // Find charity from mock data (single source of truth)
+    // Find charity (single source of truth)
     const charity = mockCharities.find((c) => c.id === body.charityId);
     if (!charity) {
-      logger.warn(`Charity not found: ${body.charityId}`, 'DonateRoute');
+      logger.warn(`Donate: Charity not found: ${body.charityId}`, 'DonateRoute');
       return NextResponse.json(
-        {
-          success: false,
-          error: 'Charity not found',
-        },
+        { success: false, error: 'Charity not found' },
         { status: 404 }
       );
     }
@@ -52,23 +45,22 @@ export async function POST(req: Request) {
     // Convert to dollars
     const amountInDollars = body.amountInCents / 100;
 
-    // Calculate split: 95% to charity, 5% to platform
+    // Calculate split: 95% charity, 5% platform
     const platformFee = Number((amountInDollars * 0.05).toFixed(2));
     const charityAmount = Number((amountInDollars - platformFee).toFixed(2));
 
     // Calculate impact using charity's impactRate
-    // e.g., $10 * charity.impactRate(2) = 20 meals
     const impact = Math.round(charityAmount * charity.impactRate);
 
     logger.info(
-      `Processing donation: $${amountInDollars} to ${charity.name} (impact: ${impact} ${charity.impactMetric})`,
+      `Donate: ${amountInDollars}$ → ${charity.name} = ${impact} ${charity.impactMetric}`,
       'DonateRoute'
     );
 
-    // Simulate processing delay
+    // Simulate processing
     await new Promise((resolve) => setTimeout(resolve, 1500));
 
-    // Generate DYNAMIC insights using charity data
+    // DYNAMIC insights (not hardcoded)
     const insights = generateDynamicInsights(amountInDollars, charity, impact);
 
     const response = {
@@ -84,21 +76,15 @@ export async function POST(req: Request) {
       charityAmount,
       impact,
       impactMetric: charity.impactMetric,
-      insights, // Now AIInsight[] objects instead of strings
+      insights, // AIInsight[] objects
     };
 
-    logger.info(`Donation successful: ${JSON.stringify(response)}`, 'DonateRoute');
+    logger.info('Donate: Success', 'DonateRoute');
     return NextResponse.json(response);
   } catch (error) {
-    logger.error(
-      `Donation error: ${error instanceof Error ? error.message : String(error)}`,
-      'DonateRoute'
-    );
+    logger.error(`Donate: Error: ${error}`, 'DonateRoute');
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Donation processing failed',
-      },
+      { success: false, error: 'Donation processing failed' },
       { status: 500 }
     );
   }
