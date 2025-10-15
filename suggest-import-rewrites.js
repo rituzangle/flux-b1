@@ -1,5 +1,6 @@
 /**
 path: suggest-import-rewrites.js
+usage: node suggest-import-rewrites.js
 cleaned up codebase. moved: utils, mocks, components to src/
 - This Script updates all scripts in app/ and src/ with modified paths
 - suggests the exact replacement lines but also includes a code command for each file—so you can open it directly in your IDE and paste the fix.
