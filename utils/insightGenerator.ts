@@ -1,7 +1,7 @@
 /**
  * Donation Insight Generator
  * 
- * @file src/utils/insightGenerator.ts
+ * @file utils/insightGenerator.ts
  * 
  * Generates personalized AI insights from:
  * - Donation amount
