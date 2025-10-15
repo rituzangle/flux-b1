@@ -3,7 +3,7 @@ import { Charity } from '@/utils/types';
 export const mockCharities: Charity[] = [
   {
     id: 'charity-1',
-    name: 'World Food Program USA',
+    name: 'World Food Program',
     description: 'Fighting hunger worldwide',
     logoUrl: '/logos/WorldFoodProgrammeLogo.png',
     website: 'https://www.wfp.org/',
