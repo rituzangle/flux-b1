@@ -80,7 +80,7 @@ export const mockCharities: Charity[] = [
     description: 'Breaking the cycle of poverty for children',
     logo: '/logos/WaterAid-logo.jpg',
     link: 'https://www.wateraid.org/us/',
-    emoji: '🌟',
+    emoji: '💧',
     verified: true,
     donorCount: 198234,
     impactMetric: 'care packages',
