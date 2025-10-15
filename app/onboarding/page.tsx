@@ -47,7 +47,7 @@ export default function OnboardingPage() {
 
   const handleSkip = () => {
     logger.info('User skipped onboarding', 'OnboardingPage');
-    router.push('/');
+    router.push('/donate');
   };
 
   if (loading) {
