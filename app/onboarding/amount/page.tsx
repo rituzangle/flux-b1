@@ -38,8 +38,19 @@ function AmountPageContent() {
       logger.info(`Loading charity: ${charityId}`, 'AmountPage');
       try {
         const charities = await getCharities();
+        const logoMap: Record<string, string> = {
+          'red-cross': '/logos/red-cross.png',
+          'unicef': '/logos/unicef-logo.png',
+          'khalsa-aid': '/logos/KhalsaAid_logo.png',
+          'save-the-children': '/logos/save-the-children.png',
+          'world-food-programme': '/logos/WorldFoodProgrammeLogo.png',
+          'children-international': '/logos/children-international-logo.png',
+          'wateraid': '/logos/wateraid-logo.jpg',
+        };
+
         const selected = charities.find(c => c.id === charityId);
         if (selected) {
+          selected.logoUrl = logoMap[selected.id] || null;
           logger.info(`Loaded charity: ${selected.name}`, 'AmountPage');
           setCharity(selected);
         } else {
@@ -52,36 +63,47 @@ function AmountPageContent() {
         router.push('/onboarding');
       }
     }
+
     loadCharity();
   }, [charityId, router]);
-const handleDonate = async () => {
-  if (!charity || typeof amount !== 'number' || amount <= 0) {
-    alert('Please enter a valid donation amount.');
-    return;
-  }
 
-  logger.info(`Processing donation: $${amount} to ${charity.name}`, 'AmountPage');
-  logger.debug(`Calling processDonation with charityId=${charity.id}, amount=$${amount}`, 'AmountPage');
-
-  setLoading(true);
-  try {
-    const result = await processDonation(charity.id, amount);
-    logger.info(`Donation successful: ${result.transactionId}`, 'AmountPage');
-
-    if (result?.transactionId) {
-      router.push(`/onboarding/success?txn=${result.transactionId}`);
-    } else {
-      logger.error('Missing transactionId in donation result', 'AmountPage');
-      alert('Donation succeeded but no transaction ID was returned.');
+  const handleDonate = async () => {
+    if (!charity || typeof amount !== 'number' || amount <= 0) {
+      alert('Please enter a valid donation amount.');
+      return;
     }
-  } catch (error) {
-    logger.error(`Donation failed: ${error}`, 'AmountPage');
-    console.error('Donation failed:', error);
-    alert('Donation failed. Please try again.');
-  } finally {
-    setLoading(false);
+
+    logger.info(`Processing donation: $${amount} to ${charity.name}`, 'AmountPage');
+    logger.debug(`Calling processDonation with charityId=${charity.id}, amount=$${amount}`, 'AmountPage');
+
+    setLoading(true);
+    try {
+      const result = await processDonation(charity.id, amount);
+      logger.info(`Donation successful: ${result.transactionId}`, 'AmountPage');
+
+      if (result?.transactionId) {
+        router.push(`/onboarding/success?txn=${result.transactionId}`);
+      } else {
+        logger.error('Missing transactionId in donation result', 'AmountPage');
+        alert('Donation succeeded but no transaction ID was returned.');
+      }
+    } catch (error) {
+      logger.error(`Donation failed: ${error}`, 'AmountPage');
+      console.error('Donation failed:', error);
+      alert('Donation failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!charity || typeof charity.name !== 'string' || typeof charity.emoji !== 'string') {
+    logger.warn('Charity data not loaded or malformed', 'AmountPage');
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-text-secondary">Loading charity details...</div>
+      </div>
+    );
   }
-};
 
   return (
     <div className="space-y-6">
@@ -89,9 +111,17 @@ const handleDonate = async () => {
 
       <div className="bg-white rounded-lg p-4 border border-border-default">
         <div className="flex items-center gap-3">
-          <span className="text-3xl" role="img" aria-label={charity.name}>
-            {charity.emoji}
-          </span>
+          {charity.logoUrl ? (
+            <img
+              src={charity.logoUrl}
+              alt={`${charity.name} logo`}
+              className="w-12 h-12 object-contain"
+            />
+          ) : (
+            <span className="text-3xl" role="img" aria-label={charity.name}>
+              {charity.emoji}
+            </span>
+          )}
           <div>
             <h3 className="text-lg font-bold text-text-primary">{charity.name}</h3>
             <p className="text-sm text-text-secondary">{charity.description}</p>
@@ -100,9 +130,7 @@ const handleDonate = async () => {
       </div>
 
       <AmountSelector selectedAmount={amount} onAmountChange={setAmount} />
-
       <ImpactPreview amount={amount} charity={charity} />
-
       <TransparencyBreakdown amount={amount} />
 
       <div className="flex flex-col gap-3">
@@ -134,11 +162,13 @@ const handleDonate = async () => {
 
 export default function AmountPage() {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-text-secondary">Loading...</div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-pulse text-text-secondary">Loading...</div>
+        </div>
+      }
+    >
       <AmountPageContent />
     </Suspense>
   );
