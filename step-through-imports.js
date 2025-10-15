@@ -55,7 +55,7 @@ function showNext() {
   }
 
   const { file, line, original, replacement } = results[index];
-  console.log(`\n📄 File: ${file}`);
+  console.log(`#-------#\nFile: ${file}`);
   console.log(`🔢 Line ${line}:`);
   console.log(`❌ ${original}`);
   console.log(`✅ ${replacement}`);
