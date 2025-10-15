@@ -19,6 +19,7 @@ export const mockCharities: Charity[] = [
     name: 'Khalsa Aid',
     description: 'Humanitarian relief without borders',
     logoUrl: '/logos/KhalsaAid_logo.png',
+    website: 'https://khalsaaid.org',
     emoji: '🤝',
     verified: true,
     donorCount: 45231,
