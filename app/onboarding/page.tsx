@@ -14,6 +14,8 @@ import ProgressIndicator from '@/components/ui/ProgressIndicator';
 import CharityCard from '@/components/onboarding/CharityCard';
 import Button from '@/components/ui/Button';
 
+export const dynamic = 'force-dynamic';
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [charities, setCharities] = useState<Charity[]>([]);
@@ -25,7 +27,7 @@ export default function OnboardingPage() {
       logger.info('Loading charities for onboarding', 'OnboardingPage');
       try {
         const data = await getCharities();
-        logger.info(`Loaded ${data.length} charities`, 'OnboardingPage');
+        logger.debug(`Fetched charities: ${JSON.stringify(data)}`, 'OnboardingPage');
         setCharities(data);
       } catch (error) {
         logger.error(`Failed to load charities: ${error}`, 'OnboardingPage');
@@ -37,20 +39,21 @@ export default function OnboardingPage() {
 
     loadCharities();
   }, []);
-const handleContinue = () => {
-  if (selectedCharity) {
-    logger.info(`User selected charity: ${selectedCharity}`, 'OnboardingPage');
-    router.push(`/onboarding/amount?charity=${selectedCharity}`);
-  } else {
-    logger.info('No charity selected, redirecting to donate flow', 'OnboardingPage');
-    router.push('/donate');
-  }
-};
+
+  const handleContinue = () => {
+    if (selectedCharity) {
+      logger.info(`User selected charity: ${selectedCharity}`, 'OnboardingPage');
+      router.push(`/onboarding/amount?charity=${selectedCharity}`);
+    } else {
+      logger.info('No charity selected, redirecting to donate flow', 'OnboardingPage');
+      router.push('/donate');
+    }
+  };
 
   const handleSkip = () => {
-  logger.info('User skipped onboarding, redirecting to /donate', 'OnboardingPage');
-  router.push('/donate');
-};
+    logger.info('User skipped onboarding, redirecting to /donate', 'OnboardingPage');
+    router.push('/donate');
+  };
 
   if (loading) {
     return (
