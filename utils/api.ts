@@ -79,6 +79,10 @@ export async function processDonation(
   }
 
   try {
+    logger.debug(
+  `Sending donation payload: ${JSON.stringify({ charityId, amountInCents: amount * 100 })}`,
+  'API'
+);
     const res = await fetch('/api/donate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
