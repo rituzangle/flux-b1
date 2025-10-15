@@ -85,7 +85,7 @@ export const mockCharities: Charity[] = [
     name: 'Water Aid',
     description: '#TeamWater to bring clean water to 2 million people around the world.',
     logoUrl: '/logos/WaterAid-logo.jpg',
-    link: 'https://www.wateraid.org/us/',
+    website: 'https://www.wateraid.org/us/',
     emoji: '💧',
     verified: true,
     donorCount: 898234,
