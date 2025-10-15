@@ -1,7 +1,7 @@
 /**
  * app/onboarding/amount/page.tsx
  * Onboarding flow - Step 2: Donation Amount Selection
- * Allows users to select donation amount and see impact preview.
+ * Renders selected charity, donation amount, and impact preview.
  */
 'use client';
 
@@ -17,6 +17,8 @@ import TransparencyBreakdown from '@/components/onboarding/TransparencyBreakdown
 import ImpactPreview from '@/components/onboarding/ImpactPreview';
 import Button from '@/components/ui/Button';
 import { Sparkles } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 function AmountPageContent() {
   const router = useRouter();
@@ -38,19 +40,17 @@ function AmountPageContent() {
       logger.info(`Loading charity: ${charityId}`, 'AmountPage');
       try {
         const charities = await getCharities();
-  
         const selected = charities.find(c => c.id === charityId);
-        if (selected) {
-          selected.logoUrl = logoMap[selected.id] || null;
-          logger.info(`Loaded charity: ${selected.name}`, 'AmountPage');
-          setCharity(selected);
-        } else {
+        if (!selected) {
           logger.warn(`Charity not found: ${charityId}`, 'AmountPage');
           router.push('/onboarding');
+          return;
         }
+
+        logger.info(`Loaded charity: ${selected.name}`, 'AmountPage');
+        setCharity(selected);
       } catch (error) {
         logger.error(`Failed to load charity: ${error}`, 'AmountPage');
-        console.error('Failed to load charity:', error);
         router.push('/onboarding');
       }
     }
@@ -80,15 +80,13 @@ function AmountPageContent() {
       }
     } catch (error) {
       logger.error(`Donation failed: ${error}`, 'AmountPage');
-      console.error('Donation failed:', error);
       alert('Donation failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!charity || typeof charity.name !== 'string' || typeof charity.emoji !== 'string') {
-    logger.warn('Charity data not loaded or malformed', 'AmountPage');
+  if (!charity) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse text-text-secondary">Loading charity details...</div>
