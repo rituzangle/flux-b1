@@ -42,6 +42,7 @@ web-build/
 .env*.local
 .env
 .env.production
+.next/
 
 # Decrypted files (keep encrypted versions)
 *.decrypted
@@ -76,4 +77,4 @@ coverage/
 
 # Misc
 *.swp
-*.swo
+*.swo.next/*
