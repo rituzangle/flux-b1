@@ -1,4 +1,5 @@
 /**
+path: utils/types-2.ts (temp name - may replace types.ts)
  * Type definitions for Flux Payment Platform
  * 
  * All types use strict TypeScript with no 'any' types.
