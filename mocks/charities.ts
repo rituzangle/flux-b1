@@ -100,7 +100,7 @@ export const mockCharities: Charity[] = [
   description: 'Bringing Joy. Growing Hope. Creating Community.',
   logoUrl: '/logos/Family-giving-tree-logo.png',
   website: 'https://familygivingtree.org/',
-  emoji: '🎁',
+  emoji: '🎄',
   verified: true,
   donorCount: 0,
   impactMetric: 'gift bundles',
