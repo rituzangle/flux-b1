@@ -52,35 +52,36 @@ function AmountPageContent() {
         router.push('/onboarding');
       }
     }
-
     loadCharity();
   }, [charityId, router]);
-
-  const handleDonate = async () => {
-    if (!charity) return;
-
-    logger.info(`Processing donation: $${amount} to ${charity.name}`, 'AmountPage');
-    setLoading(true);
-    try {
-      const result = await processDonation(charity.id, amount);
-      logger.info(`Donation successful: ${result.transactionId}`, 'AmountPage');
-      router.push(`/onboarding/success?txn=${result.transactionId}`);
-    } catch (error) {
-      logger.error(`Donation failed: ${error}`, 'AmountPage');
-      console.error('Donation failed:', error);
-      alert('Donation failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!charity) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-text-secondary">Loading...</div>
-      </div>
-    );
+const handleDonate = async () => {
+  if (!charity || typeof amount !== 'number' || amount <= 0) {
+    alert('Please enter a valid donation amount.');
+    return;
   }
+
+  logger.info(`Processing donation: $${amount} to ${charity.name}`, 'AmountPage');
+  logger.debug(`Calling processDonation with charityId=${charity.id}, amount=$${amount}`, 'AmountPage');
+
+  setLoading(true);
+  try {
+    const result = await processDonation(charity.id, amount);
+    logger.info(`Donation successful: ${result.transactionId}`, 'AmountPage');
+
+    if (result?.transactionId) {
+      router.push(`/onboarding/success?txn=${result.transactionId}`);
+    } else {
+      logger.error('Missing transactionId in donation result', 'AmountPage');
+      alert('Donation succeeded but no transaction ID was returned.');
+    }
+  } catch (error) {
+    logger.error(`Donation failed: ${error}`, 'AmountPage');
+    console.error('Donation failed:', error);
+    alert('Donation failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="space-y-6">
