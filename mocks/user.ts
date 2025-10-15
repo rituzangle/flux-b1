@@ -1,5 +1,4 @@
 import { User } from '@/utils/types';
-export const mockTransactions: Transaction[] = [
 
 export const mockUser: User[] = [
   {
