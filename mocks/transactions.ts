@@ -17,7 +17,7 @@ export const mockTransactions: Transaction[] = [
     date: new Date('2025-10-13'),
     description: 'Concert tickets',
     status: 'completed',
-    recipient: 'Sam Chen',
+    recipient: 'Steve Chen',
   },
   {
     id: 'txn-3',
