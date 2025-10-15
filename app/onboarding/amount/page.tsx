@@ -38,16 +38,7 @@ function AmountPageContent() {
       logger.info(`Loading charity: ${charityId}`, 'AmountPage');
       try {
         const charities = await getCharities();
-        const logoMap: Record<string, string> = {
-          'red-cross': '/logos/red-cross.png',
-          'unicef': '/logos/unicef-logo.png',
-          'khalsa-aid': '/logos/KhalsaAid_logo.png',
-          'save-the-children': '/logos/save-the-children.png',
-          'world-food-programme': '/logos/WorldFoodProgrammeLogo.png',
-          'children-international': '/logos/children-international-logo.png',
-          'wateraid': '/logos/wateraid-logo.jpg',
-        };
-
+  
         const selected = charities.find(c => c.id === charityId);
         if (selected) {
           selected.logoUrl = logoMap[selected.id] || null;
