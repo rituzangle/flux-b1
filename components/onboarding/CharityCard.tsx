@@ -40,9 +40,12 @@ export default function CharityCard({ charity, selected, onSelect }: CharityCard
           <p className="text-sm text-text-secondary">{charity.description}</p>
         </div>
 
-        <div className="text-xs text-text-secondary">
-          {charity.donorCount.toLocaleString()} donors
-        </div>
+<div className="text-sm text-text-secondary">
+  {typeof charity?.donorCount === 'number'
+    ? charity.donorCount.toLocaleString()
+    : '—'} donors
+</div>
+
       </div>
     </Card>
   );
