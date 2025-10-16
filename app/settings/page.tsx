@@ -6,10 +6,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUserProfile } from '@/utils/api';
-import { User } from '@/utils/types';
-import { logger } from '@/utils/prettyLogs';
-import Card from '@/components/ui/Card';
+import { getUserProfile } from '@/src/utils/api';
+import { User } from '@/src/utils/types';
+import { logger } from '@/src/utils/prettyLogs';
+import Card from '@/src/components/ui/Card';
 import { User as UserIcon, Bell, Lock, HelpCircle, LogOut } from 'lucide-react';
 
 export default function SettingsPage() {
