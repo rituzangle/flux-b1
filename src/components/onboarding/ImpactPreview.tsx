@@ -1,7 +1,8 @@
+// src/components/onboarding/ImpactPreview.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Charity } from '@/utils/types';
+import { Charity } from '@/src/utils/types';
 
 interface ImpactPreviewProps {
   amount: number;
