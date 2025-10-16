@@ -6,7 +6,6 @@ export default function QuickActions() {
   const actions = [
     { icon: Send, label: 'Send', href: '/send', color: 'bg-brand-primary' },
     { icon: HandHeart, label: 'Donate', href: '/onboarding', color: 'bg-brand-success' },
-    { icon: TrendingUp, label: 'Request', href: '/request', color: 'bg-brand-secondary' },
   ];
 
   return (
