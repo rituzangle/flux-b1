@@ -1,5 +1,6 @@
 // app/dashboard/page.tsx
 import BalanceCard from '@/src/components/dashboard/BalanceCard';
+import { mockTransactions } from '@/src/mocks/transactions';
 import QuickActions from '@/src/components/dashboard/QuickActions';
 import RecentActivity from '@/src/components/dashboard/RecentActivity';
 
