@@ -1,3 +1,7 @@
+/** path: step-through-imports.js
+usage: node: step-through-imports.js
+purpose: re-hydrate bolt's scope of moved files
+*/
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
