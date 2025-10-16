@@ -70,7 +70,7 @@ export default function OnboardingPage() {
               }`}
             >
               {/* <img src={charity.logo} alt={charity.name} className="h-12 mb-2" /> */}
-              <img src={charity.logo} alt={charity.name} className="w-8 h-12 object-contain rounded" />
+              <img src={charity.logo} alt={charity.name} className="w-12 h-12 object-contain rounded" />
               <h2 className="text-lg font-semibold">{charity.name}</h2>
               <p className="text-sm text-gray-600 line-clamp-2">{charity.description}</p>
             </button>
