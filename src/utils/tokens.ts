@@ -23,7 +23,7 @@
  * 
  * @module tokens
  */
-
+import { tokens } from '@/src/utils/tokens';
 export const tokens = {
   /**
    * Color palette
