@@ -1,5 +1,6 @@
 /**
  * Path: src/utils/api.ts
+  * Purpose: Centralized API functions for fetching user and other resources
  * API utility functions for fetching data.
  * Handles both mock data and real API calls based on environment configuration.
  */
@@ -155,10 +156,22 @@ export async function getTransactions(): Promise<Transaction[]> {
     throw error;
   }
 }
-
-export async function fetchUser() {
+/**
+ * Fetches the current user's profile from the API
+ * @returns {Promise<any>} User profile object
+ */
+export async function fetchUser(): Promise<any> {
   logger.info('Fetching user profile', 'UserService');
-  const res = await fetch('/api/user/profile');
-  if (!res.ok) throw new Error('Failed to fetch user profile');
-  return res.json();
+  try {
+    const res = await fetch(API_ENDPOINTS.userProfile);
+    if (!res.ok) {
+      throw new Error(`API responded with status ${res.status}`);
+    }
+    const data = await res.json();
+    logger.debug(`User profile received: ${JSON.stringify(data)}`, 'UserService');
+    return data;
+  } catch (error) {
+    logger.error(`Failed to fetch user profile: ${error}`, 'UserService');
+    throw error;
+  }
 }
