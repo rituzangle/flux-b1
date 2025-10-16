@@ -104,6 +104,9 @@ export default function OnboardingAmountPage() {
 
       // Navigate to dashboard upon success
       logger.info('OnboardingAmount: success → /dashboard', 'OnboardingAmount');
+      // after successful response (res)
+      // revalidate server data (fetchUser, fetchTransactions)
+      router.refresh(); 
       router.push('/dashboard');
     } catch (e: any) {
       const msg = e?.message || 'Donation failed. Please try again.';
