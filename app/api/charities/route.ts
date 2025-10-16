@@ -2,7 +2,7 @@
 // Purpose: API route to return list of charities
 
 import { NextResponse } from 'next/server';
-import { logger } from '@/utils/prettyLogs';
+import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
