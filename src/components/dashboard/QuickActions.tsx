@@ -1,3 +1,4 @@
+// src/components/dashboard/QuickActions.tsx
 import Link from 'next/link';
 import { Send, HandHeart, TrendingUp } from 'lucide-react';
 
