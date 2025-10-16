@@ -1,5 +1,7 @@
-import { AIInsight } from '@/utils/types';
-import Button from '@/components/ui/Button';
+// src/components/onboarding/AIInsightCard.tsx
+
+import { AIInsight } from '@/src/utils/types';
+import Button from '@/src/components/ui/Button';
 
 interface AIInsightCardProps {
   insight: AIInsight;
