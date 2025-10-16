@@ -21,4 +21,3 @@ export default function BalanceCard({ balance = 0 }: BalanceCardProps) {
     </Card>
   );
 }
-
