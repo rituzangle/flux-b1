@@ -1,5 +1,5 @@
-import { Charity } from '@/utils/types';
-import Card from '@/components/ui/Card';
+import { Charity } from '@/src/utils/types';
+import Card from '@/src/components/ui/Card';
 import { Check } from 'lucide-react';
 
 interface CharityCardProps {
