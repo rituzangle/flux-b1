@@ -1,4 +1,6 @@
-import { Transaction } from '@/utils/types';
+// src/components/dashboard/RecentActivity.tsx
+
+import { Transaction } from '@/src/utils/types';
 import { ArrowUpRight, ArrowDownLeft, HandHeart } from 'lucide-react';
 
 interface RecentActivityProps {
