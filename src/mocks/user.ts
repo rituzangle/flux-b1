@@ -4,7 +4,7 @@
  * @file src/mocks/user.ts
  * 
  * Single user object (not array)
- * Used by fetchUser() in utils/api.ts
+ * Used by fetchUser() in src/utils/api.ts
  */
 
 import type { User } from '@/src/utils/types';
