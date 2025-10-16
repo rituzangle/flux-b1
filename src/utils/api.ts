@@ -112,7 +112,7 @@ export async function getUserProfile(): Promise<User> {
 
   if (USE_MOCK) {
     logger.debug('Using mock user data', 'API');
-    const { mockUser } = await import('@/mocks/user');
+    const { mockUser } = await import('@/src/mocks/user');
     return mockUser;
   }
 
