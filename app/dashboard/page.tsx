@@ -13,7 +13,8 @@ export default function DashboardPage() {
     <div className="space-y-6 p-6">
       <BalanceCard balance={mockBalance} />
       <QuickActions />
-      <RecentActivity transactions={[]} />
+      <RecentActivity transactions={mockTransactions} />
+     {/*  <RecentActivity transactions={[]} */} />
     </div>
   );
 }
