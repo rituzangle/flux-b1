@@ -1,164 +1,204 @@
 /**
- * app/onboarding/amount/page.tsx
- * Onboarding flow - Step 2: Donation Amount Selection
- * Renders selected charity, donation amount, and impact preview.
+ * Path: app/onboarding/amount/page.tsx
+ * Screen: Onboarding — Select donation amount and confirm
+ * Behavior:
+ * - Reads charityId from query string
+ * - Loads charities to resolve selected charity details
+ * - Validates amount and processes donation (mock/real via utils/api)
+ * - Logs structured events for debugging
+ * - Navigates forward to Dashboard on success; Back returns to choose-a-charity
  */
+
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { getCharities, processDonation } from '@/src/utils/api';
-import { Charity } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
-import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
-import AmountSelector from '@/src/components/onboarding/AmountSelector';
-import TransparencyBreakdown from '@/src/components/onboarding/TransparencyBreakdown';
-import ImpactPreview from '@/src/components/onboarding/ImpactPreview';
+import { getCharities, processDonation } from '@/src/utils/api';
+import Card from '@/src/components/ui/Card';
+import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
-import { Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-function AmountPageContent() {
+export default function OnboardingAmountPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const charityId = searchParams.get('charity');
+  const params = useSearchParams();
 
-  const [charity, setCharity] = useState<Charity | null>(null);
-  const [amount, setAmount] = useState(10);
+  const charityId = params.get('charityId') || '';
+  const [charities, setCharities] = useState<any[]>([]);
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingCharities, setLoadingCharities] = useState(true);
+  const [error, setError] = useState('');
 
+  // Resolve selected charity from loaded list
+  const selectedCharity = useMemo(
+    () => charities.find((c) => c.id === charityId),
+    [charities, charityId]
+  );
+
+  // Load charities to render selected charity details
   useEffect(() => {
-    async function loadCharity() {
-      if (!charityId) {
-        logger.warn('No charity ID provided, redirecting to onboarding', 'AmountPage');
-        router.push('/onboarding');
-        return;
-      }
-
-      logger.info(`Loading charity: ${charityId}`, 'AmountPage');
+    let cancelled = false;
+    async function loadCharities() {
+      setLoadingCharities(true);
+      setError('');
+      logger.info('OnboardingAmount: loading charities', 'OnboardingAmount');
       try {
-        const charities = await getCharities();
-        const selected = charities.find(c => c.id === charityId);
-        if (!selected) {
-          logger.warn(`Charity not found: ${charityId}`, 'AmountPage');
-          router.push('/onboarding');
-          return;
+        // Use mocks for now; toggle to false when real API ready
+        const list = await getCharities(true);
+        if (!cancelled) {
+          setCharities(list || []);
+          logger.debug(
+            `OnboardingAmount: loaded charities count=${(list || []).length}`,
+            'OnboardingAmount'
+          );
         }
-
-        logger.info(`Loaded charity: ${selected.name}`, 'AmountPage');
-        setCharity(selected);
-      } catch (error) {
-        logger.error(`Failed to load charity: ${error}`, 'AmountPage');
-        router.push('/onboarding');
+      } catch (e: any) {
+        const msg = e?.message || 'Unable to load charities.';
+        logger.error(`OnboardingAmount: load charities failed: ${msg}`, 'OnboardingAmount');
+        if (!cancelled) setError(msg);
+      } finally {
+        if (!cancelled) setLoadingCharities(false);
       }
     }
+    loadCharities();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-    loadCharity();
-  }, [charityId, router]);
+  // Handlers
+  const handleBack = () => {
+    logger.info('OnboardingAmount: back to /onboarding', 'OnboardingAmount');
+    router.push('/onboarding');
+  };
 
-  const handleDonate = async () => {
-    if (!charity || typeof amount !== 'number' || amount <= 0) {
-      alert('Please enter a valid donation amount.');
+  const handleConfirm = async () => {
+    setError('');
+    const amt = parseFloat(amount);
+    if (!charityId) {
+      setError('Please select a charity first.');
+      return;
+    }
+    if (isNaN(amt) || amt <= 0) {
+      setError('Please enter a valid amount greater than 0.');
       return;
     }
 
-    logger.info(`Processing donation: $${amount} to ${charity.name}`, 'AmountPage');
-    logger.debug(`Calling processDonation with charityId=${charity.id}, amount=$${amount}`, 'AmountPage');
-
     setLoading(true);
-    try {
-      const result = await processDonation(charity.id, amount);
-      logger.info(`Donation successful: ${result.transactionId}`, 'AmountPage');
+    logger.info(
+      `OnboardingAmount: processDonation charityId=${charityId} amount=${amt}`,
+      'OnboardingAmount'
+    );
 
-      if (result?.transactionId) {
-        router.push(`/onboarding/success?txn=${result.transactionId}`);
-      } else {
-        logger.error('Missing transactionId in donation result', 'AmountPage');
-        alert('Donation succeeded but no transaction ID was returned.');
-      }
-    } catch (error) {
-      logger.error(`Donation failed: ${error}`, 'AmountPage');
-      alert('Donation failed. Please try again.');
+    try {
+      // Use mocks for now; toggle to false when real API ready
+      const result = await processDonation({ charityId, amount: amt, note }, true);
+      logger.debug(
+        `OnboardingAmount: donation result=${JSON.stringify(result)}`,
+        'OnboardingAmount'
+      );
+
+      // Navigate to dashboard upon success
+      logger.info('OnboardingAmount: success → /dashboard', 'OnboardingAmount');
+      router.push('/dashboard');
+    } catch (e: any) {
+      const msg = e?.message || 'Donation failed. Please try again.';
+      logger.error(`OnboardingAmount: donation failed: ${msg}`, 'OnboardingAmount');
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!charity) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-text-secondary">Loading charity details...</div>
-      </div>
-    );
-  }
-
+  // UI
   return (
-    <div className="space-y-6">
-      <ProgressIndicator currentStep={2} totalSteps={3} />
+    <div className="max-w-3xl mx-auto p-6 space-y-6">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold text-text-primary">Onboarding: Donation amount</h1>
+        <p className="text-sm text-text-secondary">
+          Choose how much to donate to your selected charity.
+        </p>
+      </div>
 
-      <div className="bg-white rounded-lg p-4 border border-border-default">
-        <div className="flex items-center gap-3">
-          {charity.logoUrl ? (
-            <img
-              src={charity.logoUrl}
-              alt={`${charity.name} logo`}
-              className="w-12 h-12 object-contain"
+      <Card>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded bg-background-secondary flex items-center justify-center">
+              {/* logo if available */}
+              {selectedCharity?.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={selectedCharity.logo}
+                  alt={selectedCharity.name}
+                  className="w-10 h-10 rounded"
+                />
+              ) : (
+                <span className="text-sm text-text-secondary">Logo</span>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-text-primary truncate">
+                {selectedCharity?.name || 'No charity selected'}
+              </p>
+              <p className="text-xs text-text-secondary truncate">
+                {selectedCharity?.tagline || 'Select a charity to preview impact'}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              label="Amount"
+              type="number"
+              isAmount
+              placeholder="0.00"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              min="0.01"
+              step="0.01"
+              required
             />
-          ) : (
-            <span className="text-3xl" role="img" aria-label={charity.name}>
-              {charity.emoji}
-            </span>
+            <Input
+              label="Note (optional)"
+              placeholder="Add a note"
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-brand-error rounded-md">
+              <p className="text-sm text-brand-error">{error}</p>
+            </div>
           )}
-          <div>
-            <h3 className="text-lg font-bold text-text-primary">{charity.name}</h3>
-            <p className="text-sm text-text-secondary">{charity.description}</p>
+
+          {loadingCharities && (
+            <div className="text-sm text-text-secondary">Loading charity details…</div>
+          )}
+
+          <div className="flex gap-3">
+            <Button variant="ghost" onClick={handleBack}>
+              Back
+            </Button>
+            <Button variant="primary" onClick={handleConfirm} disabled={loading}>
+              {loading ? 'Processing…' : 'Confirm and continue'}
+            </Button>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <AmountSelector selectedAmount={amount} onAmountChange={setAmount} />
-      <ImpactPreview amount={amount} charity={charity} />
-      <TransparencyBreakdown amount={amount} />
-
-      <div className="flex flex-col gap-3">
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={handleDonate}
-          disabled={loading || amount <= 0}
-        >
-          {loading ? (
-            'Processing...'
-          ) : (
-            <>
-              <Sparkles className="w-5 h-5 inline mr-2" />
-              Donate & See AI Insights
-            </>
-          )}
-        </Button>
-
-        <Link href="/onboarding">
-          <Button variant="ghost" fullWidth>
-            Back
-          </Button>
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-export default function AmountPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-pulse text-text-secondary">Loading...</div>
+      <Card className="bg-blue-50 border-blue-200">
+        <div className="space-y-2">
+          <h3 className="text-base font-bold text-text-primary">Impact preview</h3>
+          <p className="text-sm text-text-secondary">
+            Your donation fuels real outcomes. You’ll see personalized impact after confirmation.
+          </p>
         </div>
-      }
-    >
-      <AmountPageContent />
-    </Suspense>
+      </Card>
+    </div>
   );
 }
