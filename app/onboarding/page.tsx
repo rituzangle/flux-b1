@@ -69,7 +69,7 @@ export default function OnboardingPage() {
                 selectedCharityId === charity.id ? 'border-blue-500' : 'border-gray-300'
               }`}
             >
-              {/* <img src={charity.logo} alt={charity.name} className="h-12 mb-2" /> */}
+          
               <img src={c.logo} alt={c.name} className="w-8 h-8 object-contain rounded" />
               <h2 className="text-lg font-semibold">{charity.name}</h2>
               <p className="text-sm text-gray-600 line-clamp-2">{charity.description}</p>
