@@ -1,5 +1,5 @@
 /**
- * app/RedirectToOnboarding.tsx
+ * Path: app/RedirectToOnboarding.tsx
  * Client-side redirect to onboarding flow.
  */
 
