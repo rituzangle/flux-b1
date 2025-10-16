@@ -1,4 +1,5 @@
-import { Transaction } from '@/utils/types';
+// src/mocks/transactions.ts
+import { Transaction } from '@/src/utils/types';
 
 export const mockTransactions: Transaction[] = [
   {
