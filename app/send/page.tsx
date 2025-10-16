@@ -7,10 +7,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { logger } from '@/utils/prettyLogs';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import { logger } from '@/src/utils/prettyLogs';
+import Input from '@/src/components/ui/Input';
+import Button from '@/src/components/ui/Button';
+import Card from '@/src/components/ui/Card';
 import { Send } from 'lucide-react';
 
 export default function SendPage() {
