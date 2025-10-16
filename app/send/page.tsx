@@ -44,7 +44,7 @@ export default function SendPage() {
 
     setLoading(true);
     logger.info(`Processing send: $${amountNum.toFixed(2)} to ${recipient}`, 'SendPage');
-
+// setTimeout() is simulating a transaction. no real API call taking place
     setTimeout(() => {
       logger.info('Send transaction completed successfully', 'SendPage');
       alert(`Sent $${amountNum.toFixed(2)} to ${recipient}`);
