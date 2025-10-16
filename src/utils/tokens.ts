@@ -12,7 +12,7 @@
  * 
  * Usage:
  * ```typescript
- * import { tokens } from '@/utils/tokens';
+ * import { tokens } from '@/src/utils/tokens';
  * 
  * const buttonStyle = {
  *   backgroundColor: tokens.colors.brand.primary,
