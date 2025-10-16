@@ -1,4 +1,6 @@
-import Card from '@/components/ui/Card';
+// src/components/onboarding/TransparencyBreakdown.tsx
+
+import Card from '@/src/components/ui/Card';
 
 interface TransparencyBreakdownProps {
   amount: number;
