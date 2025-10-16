@@ -15,6 +15,7 @@ const config: Config = {
         secondary: '#f5f5f4',
         glass: 'rgba(255, 255, 255, 0.7)',
         card: '#e2e8f0', //soft gray-blue (Tailwind's slate-200)
+        // tweak #e2e8f0 to something darker like #cbd5e1 (slate-300) if needed.
       },
         text: {
           primary: '#0a0a0a',
