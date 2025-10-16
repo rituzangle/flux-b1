@@ -1,13 +1,8 @@
 /**
  * Path: app/send/page.tsx
- * Screen: Send Money
- * Features:
- * - Form to send money to another user
- * - Validates input
- * - Calls /api/send endpoint instead of mock alert
- * - Escape route: cancel → back
+ * Title: Send Money
+ * Keeper logic: Same validation/UI; replaces alert with POST /api/send and redirects to dashboard
  */
-
 'use client';
 
 import { useState } from 'react';
@@ -39,7 +34,7 @@ export default function SendPage() {
     }
 
     setLoading(true);
-    logger.info(`Send: sending $${amountNum} to ${recipient}`, 'SendPage');
+    logger.info(`Send: $${amountNum} to ${recipient}`, 'SendPage');
 
     try {
       const res = await fetch('/api/send', {
@@ -48,7 +43,6 @@ export default function SendPage() {
         body: JSON.stringify({ recipient, amount: amountNum, note }),
       });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data?.error || 'Transaction failed');
 
       logger.info(`Send success: ${JSON.stringify(data)}`, 'SendPage');
@@ -65,35 +59,13 @@ export default function SendPage() {
     <div className="max-w-2xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold text-text-primary">Send Money</h1>
       <h2 className="text-1xl font-bold text-text-primary">from app/send/page.tsx</h2>
-      
       <p className="text-base text-text-secondary">Send money to friends and family instantly.</p>
 
       <Card>
         <form onSubmit={handleSend} className="space-y-6">
-          <Input
-            label="Recipient"
-            placeholder="Enter name, email, or phone"
-            value={recipient}
-            onChange={(e) => setRecipient(e.target.value)}
-            required
-          />
-          <Input
-            label="Amount"
-            type="number"
-            isAmount
-            placeholder="0.00"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            min="0.01"
-            step="0.01"
-            required
-          />
-          <Input
-            label="Note (optional)"
-            placeholder="What's this for?"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-          />
+          <Input label="Recipient" placeholder="Enter name, email, or phone" value={recipient} onChange={(e) => setRecipient(e.target.value)} required />
+          <Input label="Amount" type="number" isAmount placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0.01" step="0.01" required />
+          <Input label="Note (optional)" placeholder="What's this for?" value={note} onChange={(e) => setNote(e.target.value)} />
 
           {error && (
             <div className="p-4 bg-red-50 border border-brand-error rounded-lg">
@@ -105,9 +77,7 @@ export default function SendPage() {
             <Button type="submit" variant="primary" fullWidth disabled={loading}>
               {loading ? 'Sending…' : <><Send className="w-5 h-5 inline mr-2" />Send ${amount || '0.00'}</>}
             </Button>
-            <Button type="button" variant="ghost" onClick={() => router.back()}>
-              Cancel
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
           </div>
         </form>
       </Card>
