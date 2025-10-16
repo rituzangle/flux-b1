@@ -1,5 +1,5 @@
-mocks/charities.ts
-import { Charity } from '@/utils/types';
+// src/mocks/charities.ts
+import { Charity } from '@/src/utils/types';
 
 export const mockCharities: Charity[] = [
   {
