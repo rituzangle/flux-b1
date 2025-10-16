@@ -3,8 +3,8 @@
  * API utility functions for fetching data.
  * Handles both mock data and real API calls based on environment configuration.
  */
-import { Charity, DonationResult, User, Transaction } from './types';
-import { logger } from './prettyLogs';
+import { Charity, DonationResult, User, Transaction } from '@/src/utils/types';
+import { logger } from '@src/utils/prettyLogs';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
