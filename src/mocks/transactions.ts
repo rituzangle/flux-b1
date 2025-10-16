@@ -1,4 +1,8 @@
-// src/mocks/transactions.ts
+/**
+ * Path: src/mocks/transactions.ts
+ * Purpose: Supply Mock transaction data for dashboard preview 
+ */
+
 import { Transaction } from '@/src/utils/types';
 
 export const mockTransactions: Transaction[] = [
