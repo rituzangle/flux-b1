@@ -1,13 +1,27 @@
-// File: app/api/charities/route.ts
-// Purpose: API route to return list of charities
-// app/api/charities/route.ts
+/**
+ * Path: app/api/charities/route.ts
+ * Endpoint: GET /api/charities
+ * Keeper logic preserved:
+ * - Uses mocks/charities as single source of truth
+ * - Returns the full Charity type including impact metadata
+ */
+
 import { NextResponse } from 'next/server';
 import { MOCK_MODULES } from '@/src/config/apiPaths';
+import { logger } from '@/src/utils/prettyLogs';
 
 export async function GET() {
-  const { mockCharities } = await MOCK_MODULES.charities();
-  return NextResponse.json(mockCharities);
+  try {
+    const { mockCharities } = await MOCK_MODULES.charities();
+    logger.info(`CharitiesAPI: returning ${mockCharities.length} charities`, 'CharitiesAPI');
+    return NextResponse.json(mockCharities);
+  } catch (e: any) {
+    const msg = e?.message || 'Failed to load charities';
+    logger.error(`CharitiesAPI: ${msg}`, 'CharitiesAPI');
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
+
 
 /** remember: For production, We'll move to managing charities data in supabase.
 
