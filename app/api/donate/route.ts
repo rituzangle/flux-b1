@@ -9,9 +9,9 @@
  */
 
 import { NextResponse } from 'next/server';
-import { mockCharities } from '@/mocks/charities';
-import { generateDynamicInsights } from '@/utils/insightGenerator';
-import { logger } from '@/utils/prettyLogs';
+import { mockCharities } from '@/src/mocks/charities';
+import { generateDynamicInsights } from '@/src/utils/insightGenerator';
+import { logger } from '@/src/utils/prettyLogs';
 
 interface DonateRequest {
   charityId: string;
