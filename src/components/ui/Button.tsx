@@ -1,5 +1,7 @@
+// src/components/ui/Button.tsx
+
 import { ButtonHTMLAttributes, forwardRef } from 'react';
-import { ButtonVariant } from '@/utils/types';
+import { ButtonVariant } from '@/src/utils/types';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
