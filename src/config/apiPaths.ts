@@ -1,7 +1,7 @@
 /**
  * Path: src/config/apiPaths.ts
- * Centralized configuration for API endpoints and mock module paths.
- * Used by src/utils/api.ts and other services to avoid hardcoded strings.
+ * Centralized configuration for API endpoints and mock module loaders.
+ * Single source of truth for both production APIs and local mocks.
  */
 
 export const API_ENDPOINTS = {
@@ -11,9 +11,13 @@ export const API_ENDPOINTS = {
   transactions: '/api/transactions',
 };
 
+/**
+ * Mock module loaders (static import map).
+ * These return promises so they can be awaited safely in utils/api.ts.
+ */
 export const MOCK_MODULES = {
-  charities: '@/src/mocks/charities',
-  donations: '@/src/mocks/donations',
-  user: '@/src/mocks/user',
-  transactions: '@/src/mocks/transactions',
+  charities: () => import('@/src/mocks/charities'),
+  donations: () => import('@/src/mocks/donations'),
+  user: () => import('@/src/mocks/user'),
+  transactions: () => import('@/src/mocks/transactions'),
 };
