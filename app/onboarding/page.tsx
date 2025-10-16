@@ -7,12 +7,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCharities } from '@/utils/api';
-import { Charity } from '@/utils/types';
-import { logger } from '@/utils/prettyLogs';
-import ProgressIndicator from '@/components/ui/ProgressIndicator';
-import CharityCard from '@/components/onboarding/CharityCard';
-import Button from '@/components/ui/Button';
+import { getCharities } from '@/src/utils/api';
+import { Charity } from '@/src/utils/types';
+import { logger } from '@/src/utils/prettyLogs';
+import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+import CharityCard from '@/src/components/onboarding/CharityCard';
+import Button from '@/src/components/ui/Button';
 
 export const dynamic = 'force-dynamic';
 
