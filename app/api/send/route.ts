@@ -4,6 +4,7 @@
  * - Validates payload
  * - Creates a transaction and updates runtimeStore.user.balance
  * - Returns { success, transaction, user }
+ Update send route: create transaction + update balance
  */
 
 import { NextResponse } from 'next/server';
