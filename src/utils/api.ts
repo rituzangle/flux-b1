@@ -11,21 +11,6 @@ import { logger } from '@/src/utils/prettyLogs';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
-// Centralized API endpoints
-const API_ENDPOINTS = {
-  charities: '/api/charities',
-  donate: '/api/donate',
-  userProfile: '/api/user/profile',
-  transactions: '/api/transactions',
-};
-
-// Centralized mock module paths
-const MOCK_MODULES = {
-  charities: '@/src/mocks/charities',
-  donations: '@/src/mocks/donations',
-  user: '@/src/mocks/user',
-  transactions: '@/src/mocks/transactions',
-};
 
 /**
  * Fetches the list of available charities.
