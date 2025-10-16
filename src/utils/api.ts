@@ -3,31 +3,44 @@
  * API utility functions for fetching data.
  * Handles both mock data and real API calls based on environment configuration.
  */
+
 import { Charity, DonationResult, User, Transaction } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
+// Centralized API endpoints
+const API_ENDPOINTS = {
+  charities: '/api/charities',
+  donate: '/api/donate',
+  userProfile: '/api/user/profile',
+  transactions: '/api/transactions',
+};
+
+// Centralized mock module paths
+const MOCK_MODULES = {
+  charities: '@/src/mocks/charities',
+  donations: '@/src/mocks/donations',
+  user: '@/src/mocks/user',
+  transactions: '@/src/mocks/transactions',
+};
+
 /**
  * Fetches the list of available charities.
- * @returns Promise<Charity[]> Array of charity objects
  */
 export async function getCharities(): Promise<Charity[]> {
   logger.info('Fetching charities list', 'API');
 
   if (USE_MOCK) {
     logger.debug('Using mock charities data', 'API');
-    const { mockCharities } = await import('@/src/mocks/charities');
-      logger.debug(`Loaded mockCharities:\n${JSON.stringify(mockCharities, null, 2)}`, 'API');
+    const { mockCharities } = await import(MOCK_MODULES.charities);
+    logger.debug(`Loaded mockCharities:\n${JSON.stringify(mockCharities, null, 2)}`, 'API');
     return mockCharities;
   }
 
   try {
-    const res = await fetch('/api/charities');
-    if (!res.ok) {
-      logger.error(`Failed to fetch charities: ${res.status} ${res.statusText}`, 'API');
-      throw new Error('Failed to fetch charities');
-    }
+    const res = await fetch(API_ENDPOINTS.charities);
+    if (!res.ok) throw new Error(`Failed to fetch charities: ${res.statusText}`);
     const data = await res.json();
     logger.info(`Successfully fetched ${data.length} charities`, 'API');
     return data;
@@ -39,31 +52,22 @@ export async function getCharities(): Promise<Charity[]> {
 
 /**
  * Processes a donation to a charity.
- * @param charityId - The ID of the charity to donate to
- * @param amount - The donation amount in dollars
- * @returns Promise<DonationResult> Result of the donation including transaction details
  */
-export async function processDonation(
-  charityId: string,
-  amount: number
-): Promise<DonationResult> {
+export async function processDonation(charityId: string, amount: number): Promise<DonationResult> {
   logger.info(`Processing donation: charityId=${charityId}, amount=$${amount}`, 'API');
 
   if (USE_MOCK) {
     logger.debug('Using mock donation processing', 'API');
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    const { mockCharities } = await import('@/mocks/charities');
-    const { generateMockInsights } = await import('@/src/mocks/donations');
+    const { mockCharities } = await import(MOCK_MODULES.charities);
+    const { generateMockInsights } = await import(MOCK_MODULES.donations);
 
     const charity = mockCharities.find(c => c.id === charityId);
-    if (!charity) {
-      logger.error(`Charity not found: ${charityId}`, 'API');
-      throw new Error('Charity not found');
-    }
+    if (!charity) throw new Error(`Charity not found: ${charityId}`);
 
     const insights = generateMockInsights(amount, charity);
-    const result = {
+    return {
       success: true,
       transactionId: `txn_mock_${Date.now()}`,
       charity,
@@ -73,27 +77,17 @@ export async function processDonation(
       impact: Math.floor(amount * charity.impactRate),
       insights,
     };
-
-    logger.info(`Mock donation successful: ${result.transactionId}`, 'API');
-    return result;
   }
 
   try {
-    logger.debug(
-  `Sending donation payload: ${JSON.stringify({ charityId, amountInCents: amount * 100 })}`,
-  'API'
-);
-    const res = await fetch('/api/donate', {
+    const payload = { charityId, amountInCents: amount * 100 };
+    const res = await fetch(API_ENDPOINTS.donate, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ charityId, amountInCents: amount * 100 }),
+      body: JSON.stringify(payload),
     });
 
-    if (!res.ok) {
-      logger.error(`Donation failed: ${res.status} ${res.statusText}`, 'API');
-      throw new Error('Donation failed');
-    }
-
+    if (!res.ok) throw new Error(`Donation failed: ${res.statusText}`);
     const data = await res.json();
     logger.info(`Donation successful: ${data.transactionId}`, 'API');
     return data;
@@ -105,25 +99,19 @@ export async function processDonation(
 
 /**
  * Fetches the current user's profile.
- * @returns Promise<User> User profile data
  */
 export async function getUserProfile(): Promise<User> {
   logger.info('Fetching user profile', 'API');
 
   if (USE_MOCK) {
-    logger.debug('Using mock user data', 'API');
-    const { mockUser } = await import('@/src/mocks/user');
+    const { mockUser } = await import(MOCK_MODULES.user);
     return mockUser;
   }
 
   try {
-    const res = await fetch('/api/user/profile');
-    if (!res.ok) {
-      logger.error(`Failed to fetch profile: ${res.status} ${res.statusText}`, 'API');
-      throw new Error('Failed to fetch profile');
-    }
+    const res = await fetch(API_ENDPOINTS.userProfile);
+    if (!res.ok) throw new Error(`Failed to fetch profile: ${res.statusText}`);
     const data = await res.json();
-    logger.info('Successfully fetched user profile', 'API');
     return data;
   } catch (error) {
     logger.error(`Error fetching user profile: ${error}`, 'API');
@@ -133,34 +121,25 @@ export async function getUserProfile(): Promise<User> {
 
 /**
  * Updates the current user's profile.
- * @param updates - Partial user object with fields to update
- * @returns Promise<User> Updated user profile
  */
 export async function updateUserProfile(updates: Partial<User>): Promise<User> {
   logger.info(`Updating user profile: ${JSON.stringify(updates)}`, 'API');
 
   if (USE_MOCK) {
-    logger.debug('Using mock user update', 'API');
-    const { mockUser } = await import('@/mocks/user');
+    const { mockUser } = await import(MOCK_MODULES.user);
     Object.assign(mockUser, updates);
-    logger.info('Mock user profile updated', 'API');
     return mockUser;
   }
 
   try {
-    const res = await fetch('/api/user/profile', {
+    const res = await fetch(API_ENDPOINTS.userProfile, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updates),
     });
 
-    if (!res.ok) {
-      logger.error(`Failed to update profile: ${res.status} ${res.statusText}`, 'API');
-      throw new Error('Failed to update profile');
-    }
-
+    if (!res.ok) throw new Error(`Failed to update profile: ${res.statusText}`);
     const data = await res.json();
-    logger.info('Successfully updated user profile', 'API');
     return data;
   } catch (error) {
     logger.error(`Error updating user profile: ${error}`, 'API');
@@ -170,25 +149,19 @@ export async function updateUserProfile(updates: Partial<User>): Promise<User> {
 
 /**
  * Fetches the user's transaction history.
- * @returns Promise<Transaction[]> Array of transaction objects
  */
 export async function getTransactions(): Promise<Transaction[]> {
   logger.info('Fetching transaction history', 'API');
 
   if (USE_MOCK) {
-    logger.debug('Using mock transactions data', 'API');
-    const { mockTransactions } = await import('@/mocks/transactions');
+    const { mockTransactions } = await import(MOCK_MODULES.transactions);
     return mockTransactions;
   }
 
   try {
-    const res = await fetch('/api/transactions');
-    if (!res.ok) {
-      logger.error(`Failed to fetch transactions: ${res.status} ${res.statusText}`, 'API');
-      throw new Error('Failed to fetch transactions');
-    }
+    const res = await fetch(API_ENDPOINTS.transactions);
+    if (!res.ok) throw new Error(`Failed to fetch transactions: ${res.statusText}`);
     const data = await res.json();
-    logger.info(`Successfully fetched ${data.length} transactions`, 'API');
     return data;
   } catch (error) {
     logger.error(`Error fetching transactions: ${error}`, 'API');
