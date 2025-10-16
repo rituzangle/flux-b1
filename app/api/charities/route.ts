@@ -21,7 +21,7 @@ export async function GET() {
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
-
+// --- 24 lines --- Oct 16, 2025
 
 /** remember: For production, We'll move to managing charities data in supabase.
 
@@ -74,3 +74,5 @@ Add sample data manually or via CSV import
 
 Update your API route (app/api/charities/route.ts) to query this table
 */
+// --- 24 lines --- Oct 16, 2025
+// --- 78 lines --- with supabase schema addition for later
