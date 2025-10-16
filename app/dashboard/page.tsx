@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
-import BalanceCard from '@/components/dashboard/BalanceCard';
-import QuickActions from '@/components/dashboard/QuickActions';
-import RecentActivity from '@/components/dashboard/RecentActivity';
+import BalanceCard from '@/src/components/dashboard/BalanceCard';
+import QuickActions from '@/src/components/dashboard/QuickActions';
+import RecentActivity from '@/src/components/dashboard/RecentActivity';
 
 export const dynamic = 'force-dynamic';
 
