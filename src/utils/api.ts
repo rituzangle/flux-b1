@@ -1,38 +1,51 @@
 /**
  * Path: src/utils/api.ts
- * Centralized API utilities. Supports real endpoints and mocks via useMock.
+ * Purpose: Single source of truth for Flux data fetches (user, charities, donations, transactions).
+ * Design:
+ * - Real endpoints via API_ENDPOINTS (production-ready)
+ * - Mocks via MOCK_MODULES (static import map returning promises)
+ * - Toggle each function with `useMock` boolean to switch behavior
+ * - Structured logging for observability
  */
 
 import { API_ENDPOINTS, MOCK_MODULES } from '@/src/config/apiPaths';
 import { logger } from '@/src/utils/prettyLogs';
 
-// Charity list
+// Load charities (mock or real)
 export async function getCharities(useMock = true) {
-  logger.info(`getCharities(useMock=${useMock})`, 'API');
+  logger.info(`API.getCharities(useMock=${useMock})`, 'API');
   if (useMock) {
     const { mockCharities } = await MOCK_MODULES.charities();
+    logger.debug(`API.getCharities: mock count=${mockCharities.length}`, 'API');
     return mockCharities;
   }
   const res = await fetch(API_ENDPOINTS.charities, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch charities');
-  return res.json();
+  if (!res.ok) {
+    const msg = `Charities API failed: ${res.status}`;
+    logger.error(msg, 'API');
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  logger.debug(`API.getCharities: real count=${(data || []).length}`, 'API');
+  return data;
 }
 
-// Donation processing
-export async function processDonation(payload: {
-  charityId: string;
-  amount: number;
-  note?: string;
-}, useMock = true) {
+// Process donation (mock or real)
+export async function processDonation(
+  payload: { charityId: string; amount: number; note?: string },
+  useMock = true
+) {
   logger.info(
-    `processDonation(${JSON.stringify(payload)}, useMock=${useMock})`,
+    `API.processDonation(charityId=${payload.charityId}, amount=${payload.amount}, useMock=${useMock})`,
     'API'
   );
 
   if (useMock) {
     const { generateMockInsights } = await MOCK_MODULES.donations();
     const insights = generateMockInsights(payload.charityId, payload.amount);
-    return { success: true, insights };
+    const result = { success: true, insights };
+    logger.debug(`API.processDonation: mock result=${JSON.stringify(result)}`, 'API');
+    return result;
   }
 
   const res = await fetch(API_ENDPOINTS.donate, {
@@ -42,30 +55,52 @@ export async function processDonation(payload: {
   });
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || 'Donation failed');
+  if (!res.ok) {
+    const msg = data?.error || `Donation API failed: ${res.status}`;
+    logger.error(msg, 'API');
+    throw new Error(msg);
+  }
+  logger.debug(`API.processDonation: real result=${JSON.stringify(data)}`, 'API');
   return data;
 }
 
-// User profile
+// Fetch user profile (mock or real)
 export async function fetchUser(useMock = true) {
-  logger.info(`fetchUser(useMock=${useMock})`, 'API');
+  logger.info(`API.fetchUser(useMock=${useMock})`, 'API');
   if (useMock) {
     const { mockUser } = await MOCK_MODULES.user();
+    logger.debug(`API.fetchUser: mock user=${JSON.stringify(mockUser)}`, 'API');
     return mockUser;
   }
   const res = await fetch(API_ENDPOINTS.userProfile, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch user profile');
-  return res.json();
+  if (!res.ok) {
+    const msg = `UserProfile API failed: ${res.status}`;
+    logger.error(msg, 'API');
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  logger.debug(`API.fetchUser: real user=${JSON.stringify(data)}`, 'API');
+  return data;
 }
 
-// Transactions
+// Fetch transactions (mock or real)
 export async function fetchTransactions(useMock = true) {
-  logger.info(`fetchTransactions(useMock=${useMock})`, 'API');
+  logger.info(`API.fetchTransactions(useMock=${useMock})`, 'API');
   if (useMock) {
     const { mockTransactions } = await MOCK_MODULES.transactions();
+    logger.debug(
+      `API.fetchTransactions: mock count=${(mockTransactions || []).length}`,
+      'API'
+    );
     return mockTransactions;
   }
   const res = await fetch(API_ENDPOINTS.transactions, { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to fetch transactions');
-  return res.json();
+  if (!res.ok) {
+    const msg = `Transactions API failed: ${res.status}`;
+    logger.error(msg, 'API');
+    throw new Error(msg);
+  }
+  const data = await res.json();
+  logger.debug(`API.fetchTransactions: real count=${(data || []).length}`, 'API');
+  return data;
 }
