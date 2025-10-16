@@ -7,7 +7,7 @@
  * Used by fetchUser() in utils/api.ts
  */
 
-import type { User } from '@/utils/types';
+import type { User } from '@/src/utils/types';
 
 export const mockUser: User = {
   id: 'user-1',
