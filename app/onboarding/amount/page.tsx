@@ -8,14 +8,14 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { getCharities, processDonation } from '@/utils/api';
-import { Charity } from '@/utils/types';
-import { logger } from '@/utils/prettyLogs';
-import ProgressIndicator from '@/components/ui/ProgressIndicator';
-import AmountSelector from '@/components/onboarding/AmountSelector';
-import TransparencyBreakdown from '@/components/onboarding/TransparencyBreakdown';
-import ImpactPreview from '@/components/onboarding/ImpactPreview';
-import Button from '@/components/ui/Button';
+import { getCharities, processDonation } from '@/src/utils/api';
+import { Charity } from '@/src/utils/types';
+import { logger } from '@/src/utils/prettyLogs';
+import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+import AmountSelector from '@/src/components/onboarding/AmountSelector';
+import TransparencyBreakdown from '@/src/components/onboarding/TransparencyBreakdown';
+import ImpactPreview from '@/src/components/onboarding/ImpactPreview';
+import Button from '@/src/components/ui/Button';
 import { Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
