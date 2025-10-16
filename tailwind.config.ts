@@ -9,12 +9,13 @@ const config: Config = {
   ],
   theme: {
     extend: {
-      colors: {
-        background: {
-          primary: '#fafaf9',
-          secondary: '#f5f5f4',
-          glass: 'rgba(255, 255, 255, 0.7)',
-        },
+      colors: { 
+      background: {
+        primary: '#fafaf9',
+        secondary: '#f5f5f4',
+        glass: 'rgba(255, 255, 255, 0.7)',
+        card: '#e2e8f0', //soft gray-blue (Tailwind's slate-200)
+      },
         text: {
           primary: '#0a0a0a',
           secondary: '#525252',
