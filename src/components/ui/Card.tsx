@@ -11,17 +11,16 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ variant = 'default', selected = false, className = '', children, ...props }, ref) => {
     const baseClasses = 'rounded-lg p-6 transition-all duration-200';
-
-    const variantClasses = {
-      default: 'bg-gray border border-border-default shadow-sm',
-      elevated: 'bg-white shadow-md hover:shadow-lg',
-      selectable: `bg-white border-2 cursor-pointer ${
-        selected
-          ? 'border-border-selected bg-blue-50'
-          : 'border-border-default hover:border-blue-300 hover:shadow-md'
-      }`,
-      glass: 'bg-background-glass backdrop-blur-md shadow-glass border border-border-default',
-    };
+const variantClasses = {
+  default: 'bg-gray-100 border border-border-default shadow-sm',
+  elevated: 'bg-gray-100 shadow-md hover:shadow-lg',
+  selectable: `bg-gray-100 border-2 cursor-pointer ${
+    selected
+      ? 'border-border-selected bg-blue-50'
+      : 'border-border-default hover:border-blue-300 hover:shadow-md'
+  }`,
+  glass: 'bg-background-glass backdrop-blur-md shadow-glass border border-border-default',
+};
 
     return (
       <div
