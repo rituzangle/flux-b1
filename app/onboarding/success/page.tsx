@@ -7,12 +7,12 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { updateUserProfile } from '@/utils/api';
-import { DonationResult } from '@/utils/types';
-import { logger } from '@/utils/prettyLogs';
-import ProgressIndicator from '@/components/ui/ProgressIndicator';
-import AIInsightCard from '@/components/onboarding/AIInsightCard';
-import Button from '@/components/ui/Button';
+import { updateUserProfile } from '@/src/utils/api';
+import { DonationResult } from '@/src/utils/types';
+import { logger } from '@/src/utils/prettyLogs';
+import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
+import AIInsightCard from '@/src/components/onboarding/AIInsightCard';
+import Button from '@/src/components/ui/Button';
 import { CheckCircle2 } from 'lucide-react';
 
 function SuccessPageContent() {
