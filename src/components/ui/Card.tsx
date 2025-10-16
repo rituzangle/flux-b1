@@ -1,7 +1,7 @@
 // src/components/ui/Card.tsx
 
 import { HTMLAttributes, forwardRef } from 'react';
-import { CardVariant } from '@/utils/types';
+import { CardVariant } from '@/src/utils/types';
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: CardVariant;
