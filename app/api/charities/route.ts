@@ -1,9 +1,16 @@
 // File: app/api/charities/route.ts
 // Purpose: API route to return list of charities
+// app/api/charities/route.ts
+import { NextResponse } from 'next/server';
+import { MOCK_MODULES } from '@/src/config/apiPaths';
+
+export async function GET() {
+  const { mockCharities } = await MOCK_MODULES.charities();
+  return NextResponse.json(mockCharities);
+}
 
 /** remember: For production, We'll move to managing charities data in supabase.
 
-*/
 import { charities } from '@/src/mocks/charities';
 import { NextResponse } from 'next/server';
 
@@ -12,7 +19,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   return NextResponse.json(charities);
 }
-
+*/
 
 
 /**
