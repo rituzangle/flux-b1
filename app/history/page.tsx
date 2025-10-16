@@ -6,9 +6,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTransactions } from '@/utils/api';
-import { Transaction } from '@/utils/types';
-import { logger } from '@/utils/prettyLogs';
+import { getTransactions } from '@/src/utils/api';
+import { Transaction } from '@/src/utils/types';
+import { logger } from '@/src/utils/prettyLogs';
 import { ArrowUpRight, ArrowDownLeft, HandHeart } from 'lucide-react';
 
 export default function HistoryPage() {
