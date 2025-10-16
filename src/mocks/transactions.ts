@@ -33,3 +33,26 @@ export const mockTransactions: Transaction[] = [
     status: 'completed',
   },
 ];
+
+/**
+'use client';
+import { useEffect, useState } from 'react';
+import { Transaction } from '@/src/utils/types';
+import RecentActivity from '@/src/components/dashboard/RecentActivity';
+
+export default function DashboardPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    async function fetchTransactions() {
+      const res = await fetch('/api/transactions');
+      const data = await res.json();
+      setTransactions(data);
+    }
+
+    fetchTransactions();
+  }, []);
+
+  return <RecentActivity transactions={transactions} />;
+}
+*/
