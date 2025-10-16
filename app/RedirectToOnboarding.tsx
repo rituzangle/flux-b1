@@ -7,7 +7,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { logger } from '@/utils/prettyLogs';
+import { logger } from '@/src/utils/prettyLogs';
 
 export default function RedirectToOnboarding() {
   const router = useRouter();
