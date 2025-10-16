@@ -35,6 +35,9 @@ export const mockTransactions: Transaction[] = [
 ];
 
 /**
+option: Fetch from API
+to use real data, you can fetch from /api/transactions in a client component:
+
 'use client';
 import { useEffect, useState } from 'react';
 import { Transaction } from '@/src/utils/types';
