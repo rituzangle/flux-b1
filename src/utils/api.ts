@@ -3,6 +3,7 @@
  * API utility functions for fetching data.
  * Handles both mock data and real API calls based on environment configuration.
  */
+import { API_ENDPOINTS, MOCK_MODULES } from '@/src/config/apiPaths';
 
 import { Charity, DonationResult, User, Transaction } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
