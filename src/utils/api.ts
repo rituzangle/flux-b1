@@ -155,3 +155,10 @@ export async function getTransactions(): Promise<Transaction[]> {
     throw error;
   }
 }
+
+export async function fetchUser() {
+  logger.info('Fetching user profile', 'UserService');
+  const res = await fetch('/api/user/profile');
+  if (!res.ok) throw new Error('Failed to fetch user profile');
+  return res.json();
+}
