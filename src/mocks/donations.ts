@@ -1,6 +1,6 @@
 // src/mocks/donations.ts
 import { AIInsight, Charity } from '@/src/utils/types';
-import { mockCharities } from './charities';
+import { mockCharities } from '@/src/mocks/charities';
 
 export function generateMockInsights(amount: number, charity: Charity): AIInsight[] {
   const insights: AIInsight[] = [];
