@@ -1,8 +1,13 @@
 /**
- * app/send/page.tsx
- * Send Money Page
- * Allows users to send money to other Flux users.
+ * Path: app/send/page.tsx
+ * Screen: Send Money
+ * Features:
+ * - Form to send money to another user
+ * - Validates input
+ * - Calls /api/send endpoint instead of mock alert
+ * - Escape route: cancel → back
  */
+
 'use client';
 
 import { useState } from 'react';
@@ -12,6 +17,8 @@ import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
 import { Send } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
 
 export default function SendPage() {
   const router = useRouter();
@@ -25,63 +32,41 @@ export default function SendPage() {
     e.preventDefault();
     setError('');
 
-    logger.info(`Send money initiated: recipient=${recipient}, amount=${amount}`, 'SendPage');
-
-    if (!recipient || !amount) {
-      const errorMsg = 'Please fill in all required fields';
-      logger.warn(errorMsg, 'SendPage');
-      setError(errorMsg);
-      return;
-    }
-
     const amountNum = parseFloat(amount);
-    if (isNaN(amountNum) || amountNum <= 0) {
-      const errorMsg = 'Please enter a valid amount';
-      logger.warn(errorMsg, 'SendPage');
-      setError(errorMsg);
+    if (!recipient || isNaN(amountNum) || amountNum <= 0) {
+      setError('Please enter a valid recipient and amount.');
       return;
     }
 
     setLoading(true);
-    logger.info(`Processing send: $${amountNum.toFixed(2)} to ${recipient}`, 'SendPage');
-// setTimeout() is simulating a transaction. no real API call taking place
-/*     setTimeout(() => {
-      logger.info('Send transaction completed successfully', 'SendPage');
-      alert(`Sent $${amountNum.toFixed(2)} to ${recipient}`);
-      router.push('/');
-    }, 1500);
-  }; */
- // replacing with 
+    logger.info(`Send: sending $${amountNum} to ${recipient}`, 'SendPage');
+
     try {
-  const res = await fetch('/api/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ recipient, amount: amountNum, note }),
-  });
+      const res = await fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipient, amount: amountNum, note }),
+      });
+      const data = await res.json();
 
-  const result = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Transaction failed');
 
-  if (!res.ok) {
-    throw new Error(result.error || 'Transaction failed');
-  }
-
-  logger.info(`Send success: ${result.message}`, 'SendPage');
-  router.push('/history'); // or wherever you want to land
-} catch (err) {
-  logger.error(`Send failed: ${err}`, 'SendPage');
-  setError(err.message);
-} finally {
-  setLoading(false);
-}
+      logger.info(`Send success: ${JSON.stringify(data)}`, 'SendPage');
+      router.push('/dashboard');
+    } catch (err: any) {
+      logger.error(`Send failed: ${err.message}`, 'SendPage');
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-text-primary mb-2">Send Money</h1>
-        <p className="text-base text-text-secondary">
-          Send money to friends and family instantly
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-text-primary">Send Money</h1>
+      <h2 className="text-1xl font-bold text-text-primary">from app/send/page.tsx</h2>
+      
+      <p className="text-base text-text-secondary">Send money to friends and family instantly.</p>
 
       <Card>
         <form onSubmit={handleSend} className="space-y-6">
@@ -92,7 +77,6 @@ export default function SendPage() {
             onChange={(e) => setRecipient(e.target.value)}
             required
           />
-
           <Input
             label="Amount"
             type="number"
@@ -104,7 +88,6 @@ export default function SendPage() {
             step="0.01"
             required
           />
-
           <Input
             label="Note (optional)"
             placeholder="What's this for?"
@@ -119,42 +102,14 @@ export default function SendPage() {
           )}
 
           <div className="flex gap-3">
-            <Button
-              type="submit"
-              variant="primary"
-              fullWidth
-              disabled={loading}
-            >
-              {loading ? (
-                'Sending...'
-              ) : (
-                <>
-                  <Send className="w-5 h-5 inline mr-2" />
-                  Send ${amount || '0.00'}
-                </>
-              )}
+            <Button type="submit" variant="primary" fullWidth disabled={loading}>
+              {loading ? 'Sending…' : <><Send className="w-5 h-5 inline mr-2" />Send ${amount || '0.00'}</>}
             </Button>
-
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => router.back()}
-            >
+            <Button type="button" variant="ghost" onClick={() => router.back()}>
               Cancel
             </Button>
           </div>
         </form>
-      </Card>
-
-      <Card className="bg-blue-50 border-blue-200">
-        <div className="space-y-2">
-          <h3 className="text-base font-bold text-text-primary">
-            Instant transfers, no fees
-          </h3>
-          <p className="text-sm text-text-secondary">
-            Send money to anyone with Flux instantly. No hidden charges.
-          </p>
-        </div>
       </Card>
     </div>
   );
