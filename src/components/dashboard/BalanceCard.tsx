@@ -1,6 +1,6 @@
-// components/dashboard/BalanceCard.tsx
+// src/components/dashboard/BalanceCard.tsx
 
-import Card from '@/components/ui/Card';
+import Card from '@/src/components/ui/Card';
 
 interface BalanceCardProps {
   balance: number;
