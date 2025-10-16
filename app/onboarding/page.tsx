@@ -1,107 +1,97 @@
 /**
- * app/onboarding/page.tsx
- * Onboarding flow - Step 1: Charity Selection
- * Allows users to select a charity to donate to during onboarding.
+ * Path: app/onboarding/page.tsx
+ * Purpose: Charity selection screen in onboarding flow
+ * Features: Error fallback, hover tooltips, dynamic routing
  */
+
 'use client';
 
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getCharities } from '@/src/utils/api';
+import { useEffect, useState } from 'react';
 import { Charity } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
-import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
-import CharityCard from '@/src/components/onboarding/CharityCard';
-import Button from '@/src/components/ui/Button';
 
 export const dynamic = 'force-dynamic';
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [charities, setCharities] = useState<Charity[]>([]);
-  const [selectedCharity, setSelectedCharity] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedCharityId, setSelectedCharityId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadCharities() {
-      logger.info('Loading charities for onboarding', 'OnboardingPage');
+    async function fetchCharities() {
+      logger.info('Fetching charities for onboarding', 'Onboarding');
       try {
-        const data = await getCharities();
-        logger.debug(`Fetched charities: ${JSON.stringify(data)}`, 'OnboardingPage');
-        setCharities(data);
-      } catch (error) {
-        logger.error(`Failed to load charities: ${error}`, 'OnboardingPage');
-        console.error('Failed to load charities:', error);
-      } finally {
-        setLoading(false);
+        const { mockCharities } = await import('@/src/mocks/charities');
+        if (!mockCharities || mockCharities.length === 0) {
+          throw new Error('No charities found in mock data');
+        }
+        setCharities(mockCharities);
+        logger.debug(`Loaded ${mockCharities.length} charities`, 'Onboarding');
+      } catch (err) {
+        logger.error(`Failed to load charities: ${err}`, 'Onboarding');
+        setError('Unable to load charities. Please try again later.');
       }
     }
 
-    loadCharities();
+    fetchCharities();
   }, []);
 
   const handleContinue = () => {
-    if (selectedCharity) {
-      logger.info(`User selected charity: ${selectedCharity}`, 'OnboardingPage');
-      router.push(`/onboarding/amount?charity=${selectedCharity}`);
-    } else {
-      logger.info('No charity selected, redirecting to donate flow', 'OnboardingPage');
-      router.push('/donate');
+    if (!selectedCharityId) {
+      logger.warn('No charity selected on continue', 'Onboarding');
+      return;
     }
+    logger.info(`Continuing with charity: ${selectedCharityId}`, 'Onboarding');
+    router.push(`/onboarding/amount?charityId=${selectedCharityId}`);
   };
 
   const handleSkip = () => {
-    logger.info('User skipped onboarding, redirecting to /donate', 'OnboardingPage');
+    logger.info('User skipped onboarding', 'Onboarding');
     router.push('/dashboard');
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-pulse text-text-secondary">Loading charities...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <ProgressIndicator currentStep={1} totalSteps={3} />
+    <main className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Choose a Charity</h1>
 
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-text-primary">Welcome to Flux!</h1>
-        <p className="text-lg text-text-secondary">
-          Start by making a difference. Donate and see our AI in action.
-        </p>
-      </div>
+      {error ? (
+        <div className="text-red-600 font-medium mb-6">{error}</div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+          {charities.map(charity => (
+            <button
+              key={charity.id}
+              onClick={() => setSelectedCharityId(charity.id)}
+              title={charity.description}
+              className={`border rounded-lg p-4 text-left transition-shadow hover:shadow-md ${
+                selectedCharityId === charity.id ? 'border-blue-500' : 'border-gray-300'
+              }`}
+            >
+              <img src={charity.logo} alt={charity.name} className="h-12 mb-2" />
+              <h2 className="text-lg font-semibold">{charity.name}</h2>
+              <p className="text-sm text-gray-600 line-clamp-2">{charity.description}</p>
+            </button>
+          ))}
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {charities.map((charity) => (
-          <CharityCard
-            key={charity.id}
-            charity={charity}
-            selected={selectedCharity === charity.id}
-            onSelect={() => setSelectedCharity(charity.id)}
-          />
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <Button
-          variant="primary"
-          fullWidth
-          disabled={!selectedCharity}
+      <div className="flex gap-4">
+        <button
           onClick={handleContinue}
+          className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          disabled={!selectedCharityId}
         >
           Continue
-        </Button>
-
+        </button>
         <button
           onClick={handleSkip}
-          className="text-sm text-text-secondary hover:text-text-primary transition-colors"
+          className="bg-gray-300 text-gray-800 px-4 py-2 rounded"
         >
           Skip for now
         </button>
       </div>
-    </div>
+    </main>
   );
 }
