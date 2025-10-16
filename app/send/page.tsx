@@ -45,12 +45,34 @@ export default function SendPage() {
     setLoading(true);
     logger.info(`Processing send: $${amountNum.toFixed(2)} to ${recipient}`, 'SendPage');
 // setTimeout() is simulating a transaction. no real API call taking place
-    setTimeout(() => {
+/*     setTimeout(() => {
       logger.info('Send transaction completed successfully', 'SendPage');
       alert(`Sent $${amountNum.toFixed(2)} to ${recipient}`);
       router.push('/');
     }, 1500);
-  };
+  }; */
+ // replacing with 
+    try {
+  const res = await fetch('/api/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ recipient, amount: amountNum, note }),
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    throw new Error(result.error || 'Transaction failed');
+  }
+
+  logger.info(`Send success: ${result.message}`, 'SendPage');
+  router.push('/history'); // or wherever you want to land
+} catch (err) {
+  logger.error(`Send failed: ${err}`, 'SendPage');
+  setError(err.message);
+} finally {
+  setLoading(false);
+}
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
