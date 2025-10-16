@@ -46,6 +46,8 @@ export default function SendPage() {
       if (!res.ok) throw new Error(data?.error || 'Transaction failed');
 
       logger.info(`Send success: ${JSON.stringify(data)}`, 'SendPage');
+      //Adjust fetch / client flows: call router.refresh() after actions, after processing donations or send money
+      router.refresh();
       router.push('/dashboard');
     } catch (err: any) {
       logger.error(`Send failed: ${err.message}`, 'SendPage');
@@ -84,4 +86,4 @@ export default function SendPage() {
     </div>
   );
 }
-/* 87 lines Oct 16 12:03 AM */
+/* 89 lines Oct 16 12:03 AM */
