@@ -1,5 +1,5 @@
 /**
- * src/utils/api.ts
+ * Path: src/utils/api.ts
  * API utility functions for fetching data.
  * Handles both mock data and real API calls based on environment configuration.
  */
