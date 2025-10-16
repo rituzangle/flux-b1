@@ -12,7 +12,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ variant = 'default', selected = false, className = '', children, ...props }, ref) => {
     const baseClasses = 'rounded-lg p-6 transition-all duration-200';
 const variantClasses = {
-  default: 'bg-gray-100 border border-border-default shadow-sm',
+  default: 'bg-gray-200 border border-border-default shadow-sm',
   elevated: 'bg-gray-100 shadow-md hover:shadow-lg',
   selectable: `bg-gray-100 border-2 cursor-pointer ${
     selected
