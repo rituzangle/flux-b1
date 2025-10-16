@@ -4,7 +4,7 @@
  * Handles both mock data and real API calls based on environment configuration.
  */
 import { Charity, DonationResult, User, Transaction } from '@/src/utils/types';
-import { logger } from '@src/utils/prettyLogs';
+import { logger } from '@/src/utils/prettyLogs';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
