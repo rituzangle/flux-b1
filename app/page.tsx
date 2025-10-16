@@ -12,8 +12,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchUser } from '@/utils/api';
-import { logger } from '@/utils/prettyLogs';
+import { fetchUser } from '@/src/utils/api';
+import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
