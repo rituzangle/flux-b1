@@ -3,10 +3,10 @@
  */
 
 import { NextResponse } from 'next/server';
-import { MOCK_MODULES } from '@/src/config/apiPaths';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 
 export async function GET() {
-  const { mockTransactions } = await MOCK_MODULES.transactions();
-  return NextResponse.json(mockTransactions);
+  return NextResponse.json(runtimeStore.transactions);
 }
+
 // --- 12 lines -- Oct 16, 2025
