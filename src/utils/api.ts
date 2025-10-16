@@ -54,7 +54,7 @@ export async function processDonation(
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     const { mockCharities } = await import('@/mocks/charities');
-    const { generateMockInsights } = await import('@/mocks/donations');
+    const { generateMockInsights } = await import('@/src/mocks/donations');
 
     const charity = mockCharities.find(c => c.id === charityId);
     if (!charity) {
