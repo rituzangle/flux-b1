@@ -12,7 +12,7 @@ function loadMockModule(): { mockList: Charity[] } {
   // First try direct ES imports (TypeScript/Next alias)
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const m = require('@/mocks/charities');
+    const m = require('@/src/mocks/charities');
     const list = (m && (m.mockCharities ?? m.charities)) || [];
     return { mockList: list as Charity[] };
   } catch (e1) {
