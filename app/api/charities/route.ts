@@ -1,5 +1,6 @@
 /**
  * Path: app/api/charities/route.ts
+ Purpose: single source of truth for charities — return the full Charity objects from services so IDs and impactRates align with UI.
  * Endpoint: GET /api/charities
  * Keeper logic preserved:
  * - Uses mocks/charities as single source of truth
@@ -7,8 +8,8 @@
  */
 // app/api/charities/route.ts
 import { NextResponse } from 'next/server';
-import { listCharities } from '@/services/charities';
-import { logger } from '@/utils/prettyLogs';
+import { listCharities } from '@/src/services/charities';
+import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
