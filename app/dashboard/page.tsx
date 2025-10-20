@@ -10,10 +10,10 @@
  */// app/dashboard/page.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 import Card from '@/src/components/ui/Card';
 import { useRouter } from 'next/navigation';
-import { logger } from '@/utils/prettyLogs';
+import { logger } from '@/src/utils/prettyLogs';
 
 export default function DashboardPage() {
   const router = useRouter();
