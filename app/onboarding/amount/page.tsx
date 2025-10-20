@@ -8,201 +8,105 @@
  * - Logs structured events for debugging
  * - Navigates forward to Dashboard on success; Back returns to choose-a-charity
  */
-
+// app/onboarding/amount/page.tsx
 'use client';
-
-import { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { logger } from '@/src/utils/prettyLogs';
-import { getCharities, processDonation } from '@/src/utils/api';
-import Card from '@/src/components/ui/Card';
-import Input from '@/src/components/ui/Input';
-import Button from '@/src/components/ui/Button';
-
-export const dynamic = 'force-dynamic';
 
 export default function OnboardingAmountPage() {
   const router = useRouter();
   const params = useSearchParams();
-
-  const charityId = params.get('charityId') || '';
-  const [charities, setCharities] = useState<any[]>([]);
-  const [amount, setAmount] = useState('');
-  const [note, setNote] = useState('');
+  const charityId = params?.get('charityId') ?? '';
+  const [amount, setAmount] = useState<number>(22);
+  const [note, setNote] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const [loadingCharities, setLoadingCharities] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // Resolve selected charity from loaded list
-  const selectedCharity = useMemo(
-    () => charities.find((c) => c.id === charityId),
-    [charities, charityId]
-  );
+  const handleBack = () => router.back();
 
-  // Load charities to render selected charity details
-  useEffect(() => {
-    let cancelled = false;
-    async function loadCharities() {
-      setLoadingCharities(true);
-      setError('');
-      logger.info('OnboardingAmount: loading charities', 'OnboardingAmount');
-      try {
-        // Use mocks for now; toggle to false when real API ready
-        const list = await getCharities(true);
-        if (!cancelled) {
-          setCharities(list || []);
-          logger.debug(
-            `OnboardingAmount: loaded charities count=${(list || []).length}`,
-            'OnboardingAmount'
-          );
-        }
-      } catch (e: any) {
-        const msg = e?.message || 'Unable to load charities.';
-        logger.error(`OnboardingAmount: load charities failed: ${msg}`, 'OnboardingAmount');
-        if (!cancelled) setError(msg);
-      } finally {
-        if (!cancelled) setLoadingCharities(false);
-      }
-    }
-    loadCharities();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  // Handlers
-  const handleBack = () => {
-    logger.info('OnboardingAmount: back to /onboarding', 'OnboardingAmount');
-    router.push('/onboarding');
-  };
-
-  const handleConfirm = async () => {
-    setError('');
-    const amt = parseFloat(amount);
-    if (!charityId) {
-      setError('Please select a charity first.');
-      return;
-    }
-    if (isNaN(amt) || amt <= 0) {
-      setError('Please enter a valid amount greater than 0.');
-      return;
-    }
-
+  async function handleConfirm() {
+    setError(null);
     setLoading(true);
-    logger.info(
-      `OnboardingAmount: processDonation charityId=${charityId} amount=${amt}`,
-      'OnboardingAmount'
-    );
-
     try {
-      // Use mocks for now; toggle to false when real API ready
-      const result = await processDonation({ charityId, amount: amt, note }, true);
-      logger.debug(
-        `OnboardingAmount: donation result=${JSON.stringify(result)}`,
-        'OnboardingAmount'
-      );
+      const resp = await fetch('/api/donate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ charityId, amount, note }),
+      });
+      const json = await resp.json();
+      if (!resp.ok || !json?.ok) {
+        setError(json?.error || 'donation_failed');
+        logger.warn('onboarding.amount: donate failed', 'onboarding');
+        setLoading(false);
+        return;
+      }
 
-      // Navigate to dashboard upon success
-      logger.info('OnboardingAmount: success → /dashboard', 'OnboardingAmount');
-      // after successful response (res)
-      // revalidate server data (fetchUser, fetchTransactions)
-      router.refresh(); 
+      // Update local runtimeStore if present (runtimeStore is shared in dev)
+      try {
+        if (typeof runtimeStore !== 'undefined' && runtimeStore && runtimeStore.user) {
+          runtimeStore.user = { ...json.user };
+          runtimeStore.transactions = json.recent ?? runtimeStore.transactions ?? [];
+        }
+      } catch (e) {
+        logger.debug('onboarding.amount: runtimeStore update skipped', 'onboarding');
+      }
+
+      logger.info('onboarding.amount: donation successful', 'onboarding');
       router.push('/dashboard');
-    } catch (e: any) {
-      const msg = e?.message || 'Donation failed. Please try again.';
-      logger.error(`OnboardingAmount: donation failed: ${msg}`, 'OnboardingAmount');
-      setError(msg);
+    } catch (err) {
+      setError(String(err));
+      logger.error('onboarding.amount: unexpected error', 'onboarding');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // UI
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-text-primary">Onboarding: Donation amount</h1>
-        <p className="text-sm text-text-secondary">
-          Choose how much to donate to your selected charity.
-        </p>
-      </div>
+    <main className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold">Donation amount</h1>
+      <h2 className="text-xl"> app/onboarding/amount/page.tsx</h2>
 
-      <Card>
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded bg-background-secondary flex items-center justify-center">
-              {/* logo if available */}
-              {selectedCharity?.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={selectedCharity.logo}
-                  alt={selectedCharity.name}
-                  className="w-10 h-10 rounded"
-                />
-              ) : (
-                <span className="text-sm text-text-secondary">Logo</span>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="text-base font-semibold text-text-primary truncate">
-                {selectedCharity?.name || 'No charity selected'}
-              </p>
-              <p className="text-xs text-text-secondary truncate">
-                {selectedCharity?.tagline || 'Select a charity to preview impact'}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Amount"
-              type="number"
-              isAmount
-              placeholder="0.00"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              min="0.01"
-              step="0.01"
-              required
-            />
-            <Input
-              label="Note (optional)"
-              placeholder="Add a note"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
-
-          {error && (
-            <div className="p-3 bg-red-50 border border-brand-error rounded-md">
-              <p className="text-sm text-brand-error">{error}</p>
-            </div>
-          )}
-
-          {loadingCharities && (
-            <div className="text-sm text-text-secondary">Loading charity details…</div>
-          )}
-
-          <div className="flex gap-3">
-            <Button variant="ghost" onClick={handleBack}>
-              Back
-            </Button>
-            <Button variant="primary" onClick={handleConfirm} disabled={loading}>
-              {loading ? 'Processing…' : 'Confirm and continue'}
-            </Button>
-          </div>
+      <section className="mt-4">
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Amount</label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(Number(e.target.value))}
+            className="mt-1 p-2 border rounded w-40"
+            min={0}
+            step="0.01"
+          />
         </div>
-      </Card>
 
-      <Card className="bg-blue-50 border-blue-200">
-        <div className="space-y-2">
-          <h3 className="text-base font-bold text-text-primary">Impact preview</h3>
-          <p className="text-sm text-text-secondary">
-            Your donation fuels real outcomes. You’ll see personalized impact after confirmation.
-          </p>
+        <div className="mb-3">
+          <label className="block text-sm font-medium">Note (optional)</label>
+          <input
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            className="mt-1 p-2 border rounded w-full"
+            placeholder="Add a note"
+          />
         </div>
-      </Card>
-    </div>
+
+        {error && <div className="p-2 bg-red-50 text-red-800 rounded mb-3">{error}</div>}
+
+        <div className="flex gap-3">
+          <button onClick={handleBack} className="px-4 py-2 border rounded">Back</button>
+          <button
+            onClick={handleConfirm}
+            className="px-4 py-2 bg-indigo-600 text-white rounded"
+            disabled={loading}
+          >
+            {loading ? 'Processing…' : `Confirm and continue`}
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
+
 // --- 208 lines --- Oct 16, 2025
