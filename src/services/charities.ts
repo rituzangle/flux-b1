@@ -3,8 +3,8 @@
 // Tries multiple import/require paths and accepts either named export `mockCharities` or `charities`.
 // Keeps runtimeStore as the authoritative runtime override when present.
 
-import type { Charity } from '@/utils/types';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import type { Charity } from '@/src/utils/types';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 
 // Helper: try to load the mock module via ESM import or CommonJS require with multiple fallbacks.
 // This avoids breakage when alias paths or module shapes change across environments.
