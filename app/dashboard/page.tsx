@@ -8,77 +8,77 @@
  * - Loads data via utils/api with mock/real toggle
  * - Structured logging for observability
  */
-
+// app/dashboard/page.tsx
 'use client';
-
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { runtimeStore } from '@/mocks/runtimeStore';
+import { useRouter } from 'next/navigation';
 import { logger } from '@/src/utils/prettyLogs';
-import BalanceCard from '@/src/components/dashboard/BalanceCard';
-import QuickActions from '@/src/components/dashboard/QuickActions';
-import RecentActivity from '@/src/components/dashboard/RecentActivity';
-import { fetchTransactions, fetchUser } from '@/src/utils/api';
-
-export const dynamic = 'force-dynamic';
 
 export default function DashboardPage() {
-  const [balance, setBalance] = useState<number>(0);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const router = useRouter();
+  const [user, setUser] = useState(() => (runtimeStore && runtimeStore.user) ?? null);
+  const [recent, setRecent] = useState(() => (runtimeStore && runtimeStore.transactions) ?? []);
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadDashboard() {
-      logger.info('Dashboard: loading user + transactions', 'DashboardPage');
-      try {
-        const user = await fetchUser(true); // toggle to false for real API
-        const tx = await fetchTransactions(true);
-
-        if (!cancelled) {
-          setBalance(user?.balance ?? 0);
-          setTransactions(tx ?? []);
-          logger.debug(
-            `Dashboard: loaded balance=${user?.balance}, txCount=${tx?.length}`,
-            'DashboardPage'
-          );
-        }
-      } catch (e: any) {
-        const msg = e?.message || 'Failed to load dashboard data';
-        logger.error(`Dashboard: ${msg}`, 'DashboardPage');
-        if (!cancelled) setError(msg);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    loadDashboard();
+    let mounted = true;
+    const refresh = () => {
+      if (!mounted) return;
+      setUser((runtimeStore && runtimeStore.user) ?? null);
+      setRecent((runtimeStore && runtimeStore.transactions) ?? []);
+    };
+    const id = setInterval(refresh, 700);
+    refresh();
+    logger.debug('dashboard: started polling runtimeStore', 'dashboard');
     return () => {
-      cancelled = true;
+      mounted = false;
+      clearInterval(id);
+      logger.debug('dashboard: stopped polling runtimeStore', 'dashboard');
     };
   }, []);
 
-  if (loading) {
-    return (
-      <main className="p-6">
-        <p className="text-text-secondary">Loading dashboard…</p>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main className="p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-        <p className="text-brand-error">{error}</p>
-      </main>
-    );
-  }
-
   return (
-    <main className="space-y-6 p-6">
-      <h1 className="text-2xl font-bold text-text-primary">Dashboard</h1>
-      <BalanceCard balance={balance} />
-      <QuickActions />
-      <RecentActivity transactions={transactions} />
+    <main className="max-w-3xl mx-auto p-6 space-y-6">
+      <header>
+        <h1 className="text-2xl font-bold">Dashboard</h1>
+        <p className="text-sm text-muted-foreground">
+          Welcome{user?.name ? `, ${user.name}` : ''}.
+        </p>
+        <p className="text-lg font-semibold">Balance: ${user ? Number(user.balance).toFixed(2) : '0.00'}</p>
+      </header>
+
+      <section className="grid gap-4">
+        <div className="p-4 border rounded">
+          <h2 className="font-semibold">Quick Actions</h2>
+          <div className="mt-3 flex gap-2">
+            <button onClick={() => router.push('/send')} className="px-3 py-2 border rounded">Send</button>
+            <button onClick={() => router.push('/onboarding')} className="px-3 py-2 border rounded">Discover causes</button>
+          </div>
+        </div>
+
+        <div className="p-4 border rounded">
+          <h3 className="font-medium">Recent Activity</h3>
+          {recent && recent.length > 0 ? (
+            <ul className="mt-3 space-y-2">
+              {recent.slice(0, 8).map((t: any) => (
+                <li key={t.id} className="flex justify-between">
+                  <div>
+                    <div className="font-medium">{t.charityId}</div>
+                    {t.note && <div className="text-sm text-muted-foreground">{t.note}</div>}
+                  </div>
+                  <div className="text-right">
+                    <div>${Number(t.amount).toFixed(2)}</div>
+                    <div className="text-xs text-muted-foreground">{new Date(t.timestamp).toLocaleString()}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted-foreground mt-3">No recent activity.</p>
+          )}
+        </div>
+      </section>
     </main>
   );
 }
+// - cp app/dashboard/page.tsx app/dashboard/page.tsx.bak
