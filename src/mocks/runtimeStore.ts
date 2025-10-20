@@ -1,11 +1,9 @@
-/**
- * Path: src/mocks/runtimeStore.ts
- * In-memory runtime store for dev mode. Not persisted across restarts.
- Persistent mock state for APIs Create a small in-memory store file used by API routes so state persists for the running dev server.
- */
 // src/mocks/runtimeStore.ts
-import type { Charity, User } from '@/src/utils/types';
-import { mockCharities } from '@/src//mocks/charities';
+// In-memory runtime store for dev mode. Not persisted across restarts.
+// Provides a seeded user, transactions, and a reference to the mock charities.
+
+import type { Charity, User } from '@/utils/types';
+import { mockCharities } from '@/mocks/charities';
 
 export const runtimeStore: {
   user: User | null;
@@ -33,5 +31,3 @@ export function applySeed(seed: Partial<typeof runtimeStore>) {
   if (Array.isArray(seed.transactions)) runtimeStore.transactions = seed.transactions;
   if (Array.isArray(seed.charities)) runtimeStore.charities = seed.charities as Charity[];
 }
-
-// 17 lines ---
