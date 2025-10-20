@@ -11,7 +11,7 @@
 // app/dashboard/page.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { useRouter } from 'next/navigation';
 import { logger } from '@/src/utils/prettyLogs';
 
