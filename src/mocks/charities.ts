@@ -112,3 +112,9 @@ export const mockCharities: Charity[] = [
 
 ];
 export const charities = mockCharities;
+
+// Also provide a CommonJS-compatible export so require() from Node finds the array.
+declare const module: any;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = Object.assign(module.exports || {}, { mockCharities, charities });
+}
