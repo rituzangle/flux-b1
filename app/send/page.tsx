@@ -11,8 +11,8 @@ import { logger } from '@/src/utils/prettyLogs';
 import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
-import { Send } from 'lucide-react';
-
+import { Send as SendIcon } from 'lucide-react';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 export const dynamic = 'force-dynamic';
 
 export default function SendPage() {
