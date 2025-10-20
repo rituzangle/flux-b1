@@ -1,4 +1,7 @@
-// app/api/donate/route.ts
+/* 
+Path: app/api/donate/route.ts
+Purpose: ensure donate mutates runtimeStore, computes insight from charity + amount, and returns updated user + recent transactions.
+*/
 import { NextResponse } from 'next/server';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { getCharityById } from '@/src/services/charities';
