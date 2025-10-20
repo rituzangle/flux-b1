@@ -1,126 +1,99 @@
 // logFlow.js
+// Robust inspector: works when mocks are TypeScript and not require()-able by plain Node.
 // Run with: node logFlow.js
-// Non-invasive inspector: imports your services, mocks and APIs and logs what changes.
 
-function safeRequire(path) {
-  try { return require(path); } catch (e) { return null; }
+const fs = require('fs');
+const path = require('path');
+
+function safeRequire(p) {
+  try { return require(p); } catch (e) { return null; }
 }
 
-const prettyLogs = safeRequire('./src/utils/prettyLogs') || { logger: console };
-const logger = (prettyLogs && prettyLogs.logger) ? prettyLogs.logger : console;
-
-logger.info('=== logFlow starting ===', 'logFlow');
-
-// 1) Load runtimeStore
-const runtimeMod = safeRequire('./src/mocks/runtimeStore') || safeRequire('./src/mocks/runtime-store') || {};
-const runtimeStore = runtimeMod.runtimeStore || runtimeMod.default || runtimeMod;
-
-logger.debug('runtimeStore loaded', 'logFlow');
-logger.info(`User before flow: ${JSON.stringify(runtimeStore.user ?? '<<no user>>')}`, 'logFlow');
-
-// 2) Load charities service and list charities
-const charitiesSvc = safeRequire('./src/services/charities') || safeRequire('./src/services/charities.js') || {};
-const listCharities = charitiesSvc.listCharities || (() => {
-  const mock = safeRequire('./src/mocks/charities') || {};
-  return mock.mockCharities || mock.charities || [];
-});
-
-const charities = listCharities();
-logger.info(`charities.count = ${Array.isArray(charities) ? charities.length : 0}`, 'logFlow');
-if (Array.isArray(charities)) {
-  logger.info(`sample charities: ${JSON.stringify(charities.slice(0,3).map(c=>({id:c.id,name:c.name})) )}`, 'logFlow');
-} else {
-  logger.warn('charities is not an array', 'logFlow');
+function readFileSafe(rel) {
+  try { return fs.readFileSync(path.resolve(rel), 'utf8'); } catch (e) { return null; }
 }
 
-// 3) Inspect app/api/donate/route if present and also the donate util if present
-const donateRoute = safeRequire('./app/api/donate/route') || safeRequire('./src/app/api/donate/route') || null;
-const donateUtil = safeRequire('./src/utils/donate') || safeRequire('./src/lib/donate') || null;
+// Try to extract exported value from TS/JS source file by finding "export const NAME = <value>"
+// This is a heuristic but works for your simple mock files.
+function extractExportedJSON(sourceText, exportName) {
+  if (!sourceText) return null;
+  const re = new RegExp(`export\\s+const\\s+${exportName}\\s*=\\s*([\\s\\S]*?);\\s*$`, 'm');
+  const m = sourceText.match(re);
+  if (!m) return null;
+  let raw = m[1].trim();
+  // Remove trailing TypeScript type assertions like "as Charity[]"
+  raw = raw.replace(/\\s+as\\s+[\\w\
 
-logger.debug('donate route loaded?', 'logFlow');
-logger.info(`donateRoute present: ${!!donateRoute}`, 'logFlow');
-logger.info(`donateUtil present: ${!!donateUtil}`, 'logFlow');
+\[\\]
 
-// 4) Prepare a simulated donation: pick first charity and a sample amount
-const charity = (Array.isArray(charities) && charities[0]) ? charities[0] : null;
-if (!charity) {
-  logger.error('No charity available to simulate donation', 'logFlow');
-  process.exit(1);
-}
-const sampleDonation = {
-  charityId: charity.id,
-  amount: 5.0,
-  note: 'logFlow test donation',
-  userId: runtimeStore?.user?.id ?? 'user_1',
-};
-
-logger.info(`Simulating donation to charityId=${sampleDonation.charityId} amount=${sampleDonation.amount}`, 'logFlow');
-
-// 5) Try to call a donate helper (non-invasive): prefer donateUtil, then donateRoute.POST if it exports, else mutate runtimeStore directly
-async function runDonateSimulation() {
+\\<\\>\\s,]+/g, '');
+  // Replace single quotes with double quotes for JSON parsing, but preserve object keys that are unquoted
+  // Very naive: convert common JS object literal to JSON-friendly string
+  // Step 1: convert backticks to double quotes
+  raw = raw.replace(/`/g, '"');
+  // Step 2: convert single-quoted strings to double-quoted
+  raw = raw.replace(/'([^']*)'/g, (_, p) => JSON.stringify(p));
+  // Step 3: add quotes around unquoted object keys (simple heuristic)
+  raw = raw.replace(/([,{]\\s*)([A-Za-z0-9_\\-]+)\\s*:/g, '$1"$2":');
+  // Now try JSON.parse
   try {
-    if (donateUtil && typeof donateUtil.createDonation === 'function') {
-      logger.debug('Using donateUtil.createDonation', 'logFlow');
-      const res = await donateUtil.createDonation(sampleDonation);
-      logger.info(`donateUtil result: ${JSON.stringify(res)}`, 'logFlow');
-    } else if (donateRoute && typeof donateRoute.POST === 'function') {
-      logger.debug('Calling donateRoute.POST', 'logFlow');
-      // Build a minimal mock request object if route expects Request
-      const mockReq = {
-        json: async () => sampleDonation,
-      };
-      const result = await donateRoute.POST(mockReq);
-      logger.info(`donateRoute.POST returned: ${JSON.stringify(result?.body ?? result)}`, 'logFlow');
-    } else {
-      logger.warn('No donate helper found; applying direct runtimeStore mutation for test', 'logFlow');
-      // Heuristic: decrement user balance and push transaction; do not persist anything
-      if (runtimeStore && runtimeStore.user && typeof runtimeStore.user.balance === 'number') {
-        const before = runtimeStore.user.balance;
-        runtimeStore.user.balance = +(before - sampleDonation.amount).toFixed(2);
-        runtimeStore.transactions = runtimeStore.transactions || [];
-        runtimeStore.transactions.push({
-          id: `tx-${Date.now()}`,
-          charityId: sampleDonation.charityId,
-          amount: sampleDonation.amount,
-          note: sampleDonation.note,
-          timestamp: new Date().toISOString(),
-        });
-        logger.info(`Applied fake mutation: balance ${before} -> ${runtimeStore.user.balance}`, 'logFlow');
-      } else {
-        logger.error('Cannot mutate runtimeStore: shape unexpected', 'logFlow');
-      }
-    }
-  } catch (err) {
-    logger.error(`Error during donation simulation: ${err?.message || String(err)}`, 'logFlow');
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
   }
 }
 
-(async () => {
-  await runDonateSimulation();
-
-  logger.info('--- Post-donation runtimeStore snapshot ---', 'logFlow');
-  logger.info(`User after flow: ${JSON.stringify(runtimeStore.user ?? '<<no user>>')}`, 'logFlow');
-  logger.info(`Recent transactions: ${JSON.stringify((runtimeStore.transactions||[]).slice(-3))}`, 'logFlow');
-
-  // 6) If there is an insights generator, call it for the donation and log
-  const insightGen = safeRequire('./src/utils/insightGenerator') || safeRequire('./src/lib/insightGenerator') || null;
-  if (insightGen && typeof insightGen.generate === 'function') {
-    try {
-      const insights = await insightGen.generate({ donation: sampleDonation, charity, user: runtimeStore.user });
-      logger.info(`insights.generate output: ${JSON.stringify(insights)}`, 'logFlow');
-    } catch (e) {
-      logger.error(`insightGen.generate error: ${String(e)}`, 'logFlow');
+function loadMockCharities() {
+  // Try regular require paths first
+  const candidates = [
+    '@/mocks/charities',
+    './src/mocks/charities',
+    './mocks/charities',
+    './src/mocks/charities.ts',
+    './src/mocks/charities.js',
+  ];
+  for (const c of candidates) {
+    const mod = safeRequire(c);
+    if (mod) {
+      const arr = (mod.mockCharities ?? mod.charities ?? mod.default ?? mod);
+      if (Array.isArray(arr) && arr.length > 0) return arr;
     }
-  } else if (insightGen && typeof insightGen === 'function') {
-    try {
-      const insights = await insightGen(sampleDonation, charity, runtimeStore.user);
-      logger.info(`insightGen output (fn): ${JSON.stringify(insights)}`, 'logFlow');
-    } catch (e) {
-      logger.error(`insightGen fn error: ${String(e)}`, 'logFlow');
-    }
-  } else {
-    logger.debug('No insightGenerator found', 'logFlow');
   }
 
-  logger.info('=== logFlow finished ===', 'logFlow');
-})();
+  // Fallback: read file and extract the exported array
+  const txt = readFileSafe('src/mocks/charities.ts') || readFileSafe('src/mocks/charities.js') || readFileSafe('src/mocks/charities.mjs');
+  const fromMock = extractExportedJSON(txt, 'mockCharities') || extractExportedJSON(txt, 'charities');
+  if (Array.isArray(fromMock)) return fromMock;
+  return [];
+}
+
+function loadRuntimeStore() {
+  const candidates = [
+    './src/mocks/runtimeStore',
+    './src/mocks/runtimeStore.ts',
+    './src/mocks/runtime-store',
+    './mocks/runtimeStore',
+  ];
+  for (const c of candidates) {
+    const mod = safeRequire(c);
+    if (mod) {
+      const rs = mod.runtimeStore ?? mod.default ?? mod;
+      if (rs && typeof rs === 'object') return rs;
+    }
+  }
+
+  // Fallback: try to read src/mocks/runtimeStore.ts and parse a user object and charities reference
+  const txt = readFileSafe('src/mocks/runtimeStore.ts') || readFileSafe('src/mocks/runtimeStore.js');
+  if (!txt) return { user: null, transactions: [], charities: [] };
+
+  // Attempt to extract a user object literal
+  const userRe = /user\s*:\s*\\{([\\s\\S]*?)\\}\\s*as\\s*User/;
+  const userMatch = txt.match(userRe);
+  let user = null;
+  if (userMatch) {
+    let raw = `{${userMatch[1]}}`;
+    raw = raw.replace(/\\s+as\\s+[\\w\
+
+\[\\]
+
+\\<\\>\\s,]+/g, '');
