@@ -1,4 +1,6 @@
 // src/mocks/charities.ts
+// canonical mock charities used in dev
+
 import { Charity } from '@/src/utils/types';
 
 export const mockCharities: Charity[] = [
