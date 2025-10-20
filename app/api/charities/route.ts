@@ -5,20 +5,21 @@
  * - Uses mocks/charities as single source of truth
  * - Returns the full Charity type including impact metadata
  */
-
+// app/api/charities/route.ts
 import { NextResponse } from 'next/server';
-import { MOCK_MODULES } from '@/src/config/apiPaths';
-import { logger } from '@/src/utils/prettyLogs';
+import { listCharities } from '@/services/charities';
+import { logger } from '@/utils/prettyLogs';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const { mockCharities } = await MOCK_MODULES.charities();
-    logger.info(`CharitiesAPI: returning ${mockCharities.length} charities`, 'CharitiesAPI');
-    return NextResponse.json(mockCharities);
-  } catch (e: any) {
-    const msg = e?.message || 'Failed to load charities';
-    logger.error(`CharitiesAPI: ${msg}`, 'CharitiesAPI');
-    return NextResponse.json({ error: msg }, { status: 500 });
+    logger.info('charities: GET requested', 'charities');
+    const items = listCharities() || [];
+    return NextResponse.json({ ok: true, charities: items });
+  } catch (err) {
+    logger.error('charities: GET failed ' + String(err), 'charities');
+    return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
 // --- 24 lines --- Oct 16, 2025
