@@ -14,76 +14,92 @@ import Card from '@/src/components/ui/Card';
 import { Send as SendIcon } from 'lucide-react';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
 export const dynamic = 'force-dynamic';
-
 export default function SendPage() {
   const router = useRouter();
-  const [recipient, setRecipient] = useState('');
-  const [amount, setAmount] = useState('');
+  const [recipient, setRecipient] = useState('sss');
+  const [amount, setAmount] = useState<number>(20.9);
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    const amountNum = parseFloat(amount);
-    if (!recipient || isNaN(amountNum) || amountNum <= 0) {
-      setError('Please enter a valid recipient and amount.');
-      return;
-    }
-
+  async function handleSend() {
+    setError(null);
     setLoading(true);
-    logger.info(`Send: $${amountNum} to ${recipient}`, 'SendPage');
-
     try {
-      const res = await fetch('/api/send', {
+      const resp = await fetch('/api/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ recipient, amount: amountNum, note }),
+        body: JSON.stringify({ recipientName: recipient, amount, note }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || 'Transaction failed');
+      const json = await resp.json();
+      if (!resp.ok || !json?.ok) {
+        setError(json?.error || 'send_failed');
+        setLoading(false);
+        return;
+      }
 
-      logger.info(`Send success: ${JSON.stringify(data)}`, 'SendPage');
-      //Adjust fetch / client flows: call router.refresh() after actions, after processing donations or send money
-      router.refresh();
+      // Update runtimeStore locally (dev-only)
+      try {
+        if (typeof runtimeStore !== 'undefined' && runtimeStore && runtimeStore.user) {
+          runtimeStore.user = { ...json.user };
+          runtimeStore.transactions = json.recent ?? runtimeStore.transactions ?? [];
+        }
+      } catch (e) {
+        logger.debug('send: runtimeStore update skipped', 'send');
+      }
+      // Clear form to avoid stale values on back/forward
+      setRecipient('');
+      setAmount(0);
+      setNote('');
+
       router.push('/dashboard');
-    } catch (err: any) {
-      logger.error(`Send failed: ${err.message}`, 'SendPage');
-      setError(err.message);
+    } catch (e) {
+      setError(String(e));
+      logger.error('send: unexpected error', 'send');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-text-primary">Send Money</h1>
-      <h2 className="text-1xl font-bold text-text-primary">from app/send/page.tsx</h2>
-      <p className="text-base text-text-secondary">Send money to friends and family instantly.</p>
-
+    <main className="max-w-3xl mx-auto p-6">
       <Card>
-        <form onSubmit={handleSend} className="space-y-6">
-          <Input label="Recipient" placeholder="Enter name, email, or phone" value={recipient} onChange={(e) => setRecipient(e.target.value)} required />
-          <Input label="Amount" type="number" isAmount placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} min="0.01" step="0.01" required />
-          <Input label="Note (optional)" placeholder="What's this for?" value={note} onChange={(e) => setNote(e.target.value)} />
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Send money</h1>
+          <SendIcon className="w-6 h-6 text-slate-500" />
+        </div>
 
-          {error && (
-            <div className="p-4 bg-red-50 border border-brand-error rounded-lg">
-              <p className="text-sm text-brand-error font-medium">{error}</p>
-            </div>
-          )}
-
-          <div className="flex gap-3">
-            <Button type="submit" variant="primary" fullWidth disabled={loading}>
-              {loading ? 'Sending…' : <><Send className="w-5 h-5 inline mr-2" />Send ${amount || '0.00'}</>}
-            </Button>
-            <Button type="button" variant="ghost" onClick={() => router.back()}>Cancel</Button>
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="block text-sm">Recipient</label>
+            <Input value={recipient} onChange={(e) => setRecipient((e.target as HTMLInputElement).value)} />
           </div>
-        </form>
+
+          <div>
+            <label className="block text-sm">Amount</label>
+            <Input
+              type="number"
+              value={String(amount)}
+              onChange={(e) => setAmount(Number((e.target as HTMLInputElement).value))}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm">Note (optional)</label>
+            <Input value={note} onChange={(e) => setNote((e.target as HTMLInputElement).value)} />
+          </div>
+
+          {error && <div className="text-sm text-red-600">{error}</div>}
+
+          <div className="mt-4 flex gap-3">
+            <Button variant="outline" onClick={() => router.back()}>Cancel</Button>
+            <Button onClick={handleSend} disabled={loading}>
+              {loading ? 'Processing…' : `Send $${Number(amount || 0).toFixed(2)}`}
+            </Button>
+          </div>
+        </div>
       </Card>
-    </div>
+    </main>
   );
 }
 /* 89 lines Oct 16 12:03 AM */
