@@ -31,3 +31,4 @@ export function applySeed(seed: Partial<typeof runtimeStore>) {
   if (Array.isArray(seed.transactions)) runtimeStore.transactions = seed.transactions;
   if (Array.isArray(seed.charities)) runtimeStore.charities = seed.charities as Charity[];
 }
+// --- 34 lines --- oct 20
