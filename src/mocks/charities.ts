@@ -109,3 +109,4 @@ export const mockCharities: Charity[] = [
 },
 
 ];
+export const charities = mockCharities;
