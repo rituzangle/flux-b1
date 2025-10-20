@@ -1,171 +1,75 @@
-/**
- * Path: app/api/donate/route.ts
- * Endpoint: POST /api/donate
- * Purpose:
- * - Preserve keeper logic (amountInCents → dollars, 95/5 split, impact calc)
- * - Validate payload strictly
- * - Use unified runtimeStore (single source of truth during dev) for charities/user/transactions
- * - Generate dynamic insights via donations mock (generateDynamicInsights OR generateMockInsights)
- * - Create transaction object, persist to runtimeStore.transactions, update runtimeStore.user.balance
- * - Return structured response: { success, transaction, user, insights }
- * - Health-check GET supported
- *
- * Notes:
- * - runtimeStore is expected at src/mocks/runtimeStore.ts and to be imported here
- * - mocks/donations should expose generateDynamicInsights or generateMockInsights
- * - Keeper logic and numeric rounding preserved; no hardcoded insights
- */
-
+// app/api/donate/route.ts
 import { NextResponse } from 'next/server';
+import type { Charity } from '@/src/utils/types';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
-import { MOCK_MODULES } from '@/src/config/apiPaths';
+import { getCharityById } from '@/src/services/charities';
 import { logger } from '@/src/utils/prettyLogs';
 
-type DonatePayload = {
+export const dynamic = 'force-dynamic';
+
+type DonateBody = {
   charityId: string;
-  amountInCents: number;
+  amount: number;
   note?: string;
+  userId?: string;
 };
 
-type Transaction = {
-  id: string;
-  type: 'donation' | string;
-  charityId: string;
-  charityName: string;
-  charityEmoji?: string;
-  amount: number; // dollars
-  platformFee: number;
-  charityAmount: number;
-  impact: number;
-  impactMetric?: string;
-  note?: string;
-  createdAt: string;
-};
-
-export async function GET() {
-  logger.info('DonateRoute: health check', 'DonateRoute');
-  return NextResponse.json({ status: 'ok' }, { status: 200 });
+function makeInsight(charity: Charity | undefined, amount: number) {
+  try {
+    if (!charity) return `Thank you for supporting this cause.`;
+    const impactCount = Math.max(1, Math.floor(amount / (charity.impactRate || 1)));
+    return `You helped ${impactCount} ${charity.impactMetric || 'people'} with ${charity.name}.`;
+  } catch (e) {
+    return 'Thank you for your donation.';
+  }
 }
 
 export async function POST(req: Request) {
-  let body: DonatePayload | undefined;
   try {
-    body = await req.json();
-  } catch (err: any) {
-    logger.warn('DonateRoute: invalid JSON body', 'DonateRoute');
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
-  }
-
-  const validationError = validate(body);
-  if (validationError) {
-    logger.warn(`DonateRoute: validation failed: ${validationError}`, 'DonateRoute');
-    return NextResponse.json({ error: validationError }, { status: 400 });
-  }
-
-  const { charityId, amountInCents, note } = body!;
-  try {
-    // Resolve charity from runtimeStore (single source of truth in dev)
-    const charity = runtimeStore.charities.find((c: any) => c.id === charityId);
-    if (!charity) {
-      const msg = `Unknown charityId: ${charityId}`;
-      logger.warn(`DonateRoute: ${msg}`, 'DonateRoute');
-      return NextResponse.json({ error: msg }, { status: 404 });
+    const body = await req.json().catch(() => null) as DonateBody | null;
+    if (!body || typeof body.amount !== 'number' || !body.charityId) {
+      logger.warn('donate: invalid request body', 'donate');
+      return NextResponse.json({ error: 'invalid_request' }, { status: 400 });
     }
 
-    // Keeper logic: convert cents -> dollars; apply platform fee split
-    const amountInDollars = Number((amountInCents / 100).toFixed(2));
-    const platformFee = Number((amountInDollars * 0.05).toFixed(2));
-    const charityAmount = Number((amountInDollars - platformFee).toFixed(2));
-
-    // Impact using charity's metadata (impactRate)
-    const impactRate = Number(charity?.impactRate || 0);
-    const impactMetric = charity?.impactMetric ? String(charity.impactMetric) : undefined;
-    const impact = Math.max(0, Math.round(charityAmount * impactRate));
-
-    logger.info(
-      `DonateRoute: processing donation charity=${charityId} amount=$${amountInDollars} impact=${impact} ${impactMetric ?? ''}`,
-      'DonateRoute'
-    );
-
-    // Simulate processing delay for realism
-    await sleep(1200);
-
-    // Generate dynamic insights from donations mock (prefer dynamic generator)
-    let insights: any[] = [];
-    try {
-      const donationsMod = await MOCK_MODULES.donations();
-      const dynamicGen = (donationsMod as any).generateDynamicInsights;
-      const mockGen = (donationsMod as any).generateMockInsights;
-
-      if (typeof dynamicGen === 'function') {
-        insights = await dynamicGen(amountInDollars, charity, impact);
-      } else if (typeof mockGen === 'function') {
-        insights = await mockGen(charityId, amountInDollars);
-      } else {
-        insights = [];
-      }
-    } catch (insErr: any) {
-      logger.warn(`DonateRoute: insights generation failed: ${insErr?.message || insErr}`, 'DonateRoute');
-      insights = [];
+    const user = (runtimeStore && runtimeStore.user) || null;
+    if (!user) {
+      logger.warn('donate: no runtime user', 'donate');
+      return NextResponse.json({ error: 'no_user' }, { status: 500 });
     }
 
-    // Build transaction object and persist to runtimeStore
-    const txn: Transaction = {
-      id: `txn_${Date.now()}`,
-      type: 'donation',
-      charityId: charity.id,
-      charityName: charity.name,
-      charityEmoji: charity.emoji,
-      amount: amountInDollars,
-      platformFee,
-      charityAmount,
-      impact,
-      impactMetric,
-      note: note || '',
-      createdAt: new Date().toISOString(),
+    const amount = Math.max(0, Number(body.amount));
+    const before = Number(user.balance ?? 0);
+    const after = Math.max(0, +(before - amount).toFixed(2));
+    user.balance = after;
+    runtimeStore.transactions = runtimeStore.transactions || [];
+
+    const tx = {
+      id: `tx-${Date.now()}`,
+      userId: user.id,
+      charityId: body.charityId,
+      amount,
+      note: body.note || null,
+      timestamp: new Date().toISOString(),
     };
 
-    // Unshift so newest transactions appear first
-    runtimeStore.transactions.unshift(txn);
+    runtimeStore.transactions.unshift(tx);
+    if (runtimeStore.transactions.length > 200) runtimeStore.transactions.length = 200;
 
-    // Update user balance (protect numeric invariants)
-    if (typeof runtimeStore.user.balance === 'number') {
-      runtimeStore.user.balance = Number((runtimeStore.user.balance - amountInDollars).toFixed(2));
-      if (Number.isNaN(runtimeStore.user.balance) || runtimeStore.user.balance < 0) {
-        runtimeStore.user.balance = 0;
-      }
-    }
+    const charity = getCharityById(body.charityId);
+    const insights = [makeInsight(charity, amount)];
 
-    const response = {
-      success: true,
-      transaction: txn,
-      user: runtimeStore.user,
+    logger.info(`donate: user ${user.id} gave $${amount} to ${body.charityId}`, 'donate');
+
+    return NextResponse.json({
+      ok: true,
+      user: { ...user },
+      tx,
+      recent: runtimeStore.transactions.slice(0, 8),
       insights,
-    };
-
-    logger.info(`DonateRoute: completed txn=${txn.id} charity=${charityId} amount=$${amountInDollars}`, 'DonateRoute');
-    return NextResponse.json(response, { status: 200 });
-  } catch (e: any) {
-    const msg = e?.message || 'Donation processing failed';
-    logger.error(`DonateRoute: unexpected error: ${msg}`, 'DonateRoute');
-    return NextResponse.json({ error: msg }, { status: 500 });
+    });
+  } catch (err) {
+    logger.error(`donate: unexpected error ${String(err)}`, 'donate');
+    return NextResponse.json({ error: 'server_error' }, { status: 500 });
   }
 }
-
-/* Helpers */
-
-function validate(body?: DonatePayload): string | null {
-  if (!body || typeof body !== 'object') return 'Missing request body';
-  const { charityId, amountInCents } = body;
-  if (!charityId || typeof charityId !== 'string' || charityId.trim() === '') return 'charityId is required';
-  if (amountInCents === undefined || amountInCents === null) return 'amountInCents is required';
-  if (typeof amountInCents !== 'number' || Number.isNaN(amountInCents)) return 'amountInCents must be a number';
-  if (amountInCents <= 0) return 'amountInCents must be greater than 0';
-  return null;
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// --- 84 lines --- Oct 16, 2025
