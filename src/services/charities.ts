@@ -1,7 +1,7 @@
 // src/services/charities.ts
-import type { Charity } from '@/utils/types';
-import * as mockModule from '@/mocks/charities';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import type { Charity } from '@/src/utils/types';
+import * as mockModule from '@/src/mocks/charities';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 
 const packagedMockCharities: Charity[] =
   (mockModule as any).mockCharities ?? (mockModule as any).charities ?? [];
