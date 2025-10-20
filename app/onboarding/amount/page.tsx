@@ -12,7 +12,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { runtimeStore } from '@/mocks/runtimeStore';
-import { logger } from '@/utils/prettyLogs';
+import { logger } from '@/src/utils/prettyLogs';
 import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
