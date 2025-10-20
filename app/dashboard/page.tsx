@@ -37,6 +37,7 @@ export default function DashboardPage() {
     <main className="max-w-4xl mx-auto p-6 space-y-6">
       <header>
         <h1 className="text-2xl font-bold">Dashboard</h1>
+        <h2>app/dashboard/page.tsx</h2>
         <p className="text-sm text-muted-foreground">Welcome{user?.name ? `, ${user.name}` : ''}.</p>
         <p className="text-lg font-semibold">Balance: ${user ? Number(user.balance).toFixed(2) : '0.00'}</p>
       </header>
@@ -46,7 +47,6 @@ export default function DashboardPage() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="font-semibold">Quick Actions</h2>
-              <h3 className="font-semibold"> app/dashboard/page.tsx </h3>
               <div className="text-sm text-muted-foreground">Send, Discover causes, and more</div>
             </div>
             <div className="flex gap-2">
