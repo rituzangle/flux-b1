@@ -5,7 +5,7 @@
  */
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { logger } from '@/src/utils/prettyLogs';
 import Input from '@/src/components/ui/Input';
