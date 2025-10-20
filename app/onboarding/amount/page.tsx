@@ -7,13 +7,15 @@
  * - Validates amount and processes donation (mock/real via utils/api)
  * - Logs structured events for debugging
  * - Navigates forward to Dashboard on success; Back returns to choose-a-charity
- */
-// app/onboarding/amount/page.tsx
+ */// app/onboarding/amount/page.tsx
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { runtimeStore } from '@/src/mocks/runtimeStore';
-import { logger } from '@/src/utils/prettyLogs';
+import { runtimeStore } from '@/mocks/runtimeStore';
+import { logger } from '@/utils/prettyLogs';
+import Input from '@/src/components/ui/Input';
+import Button from '@/src/components/ui/Button';
+import Card from '@/src/components/ui/Card';
 
 export default function OnboardingAmountPage() {
   const router = useRouter();
@@ -24,10 +26,21 @@ export default function OnboardingAmountPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Ensure we reset amount if charityId changes or on mount to avoid stale previous values
+  useEffect(() => {
+    setNote('');
+    setAmount(22);
+    setError(null);
+  }, [charityId]);
+
   const handleBack = () => router.back();
 
   async function handleConfirm() {
     setError(null);
+    if (!charityId) {
+      setError('No charity selected');
+      return;
+    }
     setLoading(true);
     try {
       const resp = await fetch('/api/donate', {
@@ -43,7 +56,7 @@ export default function OnboardingAmountPage() {
         return;
       }
 
-      // Update local runtimeStore if present (runtimeStore is shared in dev)
+      // Update runtimeStore (dev-only) so dashboard reacts quickly
       try {
         if (typeof runtimeStore !== 'undefined' && runtimeStore && runtimeStore.user) {
           runtimeStore.user = { ...json.user };
@@ -52,6 +65,10 @@ export default function OnboardingAmountPage() {
       } catch (e) {
         logger.debug('onboarding.amount: runtimeStore update skipped', 'onboarding');
       }
+
+      // Clear local form state to avoid reusing previous donation values
+      setNote('');
+      setAmount(22);
 
       logger.info('onboarding.amount: donation successful', 'onboarding');
       router.push('/dashboard');
@@ -65,46 +82,38 @@ export default function OnboardingAmountPage() {
 
   return (
     <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold">Donation amount</h1>
-      <h2 className="text-xl"> app/onboarding/amount/page.tsx</h2>
+      <Card>
+        <h1 className="text-2xl font-bold">Donation amount</h1>
+        <p className="text-sm text-muted-foreground mt-1">Choose how much to donate to your selected charity.</p>
 
-      <section className="mt-4">
-        <div className="mb-3">
-          <label className="block text-sm font-medium">Amount</label>
-          <input
-            type="number"
-            value={amount}
-            onChange={(e) => setAmount(Number(e.target.value))}
-            className="mt-1 p-2 border rounded w-40"
-            min={0}
-            step="0.01"
-          />
+        <div className="mt-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium">Amount</label>
+            <Input
+              type="number"
+              value={String(amount)}
+              onChange={(e) => setAmount(Number((e.target as HTMLInputElement).value))}
+              min={0}
+              step="0.01"
+              className="w-40"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Note (optional)</label>
+            <Input value={note} onChange={(e) => setNote((e.target as HTMLInputElement).value)} />
+          </div>
+
+          {error && <div className="p-2 bg-red-50 text-red-800 rounded">{error}</div>}
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={handleBack}>Back</Button>
+            <Button onClick={handleConfirm} disabled={loading}>
+              {loading ? 'Processing…' : 'Confirm and continue'}
+            </Button>
+          </div>
         </div>
-
-        <div className="mb-3">
-          <label className="block text-sm font-medium">Note (optional)</label>
-          <input
-            type="text"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="mt-1 p-2 border rounded w-full"
-            placeholder="Add a note"
-          />
-        </div>
-
-        {error && <div className="p-2 bg-red-50 text-red-800 rounded mb-3">{error}</div>}
-
-        <div className="flex gap-3">
-          <button onClick={handleBack} className="px-4 py-2 border rounded">Back</button>
-          <button
-            onClick={handleConfirm}
-            className="px-4 py-2 bg-indigo-600 text-white rounded"
-            disabled={loading}
-          >
-            {loading ? 'Processing…' : `Confirm and continue`}
-          </button>
-        </div>
-      </section>
+      </Card>
     </main>
   );
 }
