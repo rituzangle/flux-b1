@@ -1,6 +1,6 @@
 // src/mocks/charities.ts
 // canonical mock charities used in dev
-
+// This file is written so it works with both TypeScript/Next imports and plain Node require().
 import { Charity } from '@/src/utils/types';
 
 export const mockCharities: Charity[] = [
