@@ -230,5 +230,5 @@ export default function OnboardingAmountPage() {
     </main>
   );
 }
-
+*/
 // --- 208 lines --- Oct 16, 2025
