@@ -15,7 +15,7 @@ import BalanceCard from '@/src/components/dashboard/BalanceCard';
 import RecentActivity from '@/src/components/dashboard/RecentActivity';
 import QuickActions from '@/src/components/dashboard/QuickActions';
 import Card from '@/src/components/ui/Card';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 
 /**
  * Dashboard page
