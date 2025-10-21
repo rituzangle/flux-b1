@@ -1,4 +1,5 @@
 // src/lib/dbHelpers.ts
+// small server-side helper
 import clients from './boltDatabaseClient';
 export const server = clients.server;
 export const client = clients.client;
