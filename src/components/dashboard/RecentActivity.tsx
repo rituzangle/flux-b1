@@ -32,14 +32,58 @@ function formatAmount(t: any) {
   return `${sign}$${Math.abs(amt).toFixed(2)}`;
 }
 
+/**
+ * Try several heuristics to resolve a charity name from a transaction:
+ * 1) match charity.id === charityId
+ * 2) match charity.id === `charity-${charityId}` or stripped digits
+ * 3) slug match: charityId contains charity.name slug
+ * 4) alias map: check common name variations
+ */
+function resolveCharityName(charityId: any, charities: any[]) {
+  if (!charityId || !Array.isArray(charities)) return null;
+  const cid = String(charityId);
+
+  // build maps
+  const byId = Object.fromEntries(charities.map((c: any) => [String(c.id), c]));
+  const byLowerName = Object.fromEntries(charities.map((c: any) => [String(c.name || '').toLowerCase(), c]));
+
+  // 1) direct id
+  if (byId[cid] && byId[cid].name) return byId[cid].name;
+
+  // 2) try prefixed or numeric variants: "charity-1" vs "1"
+  if (cid.match(/^\d+$/)) {
+    const alt = `charity-${cid}`;
+    if (byId[alt] && byId[alt].name) return byId[alt].name;
+  }
+  const stripped = cid.replace(/^charity-/, '');
+  if (byId[stripped] && byId[stripped].name) return byId[stripped].name;
+
+  // 3) slug match: see if any charity name slug appears inside the id
+  const slug = cid.toLowerCase();
+  for (const c of charities) {
+    const nameSlug = String(c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    if (nameSlug && slug.includes(nameSlug)) return c.name;
+  }
+
+  // 4) alias heuristics: check if id looks like a known short code (e.g., 'red-cross' or 'unicef')
+  for (const c of charities) {
+    const low = String(c.name || '').toLowerCase();
+    if (cid.toLowerCase().includes(low.split(' ')[0])) return c.name;
+  }
+
+  // 5) fallback: try matching by name exact (if charityId is actually a name)
+  const lower = cid.toLowerCase();
+  if (byLowerName[lower] && byLowerName[lower].name) return byLowerName[lower].name;
+
+  return null;
+}
+
 export default function RecentActivity({ transactions }: RecentActivityProps) {
   const txs = Array.isArray(transactions)
     ? transactions
     : (runtimeStore && Array.isArray(runtimeStore.transactions) ? runtimeStore.transactions : []);
 
-  const charitiesById = (runtimeStore && Array.isArray(runtimeStore.charities))
-    ? Object.fromEntries(runtimeStore.charities.map((c: any) => [c.id, c]))
-    : {};
+  const charities = (runtimeStore && Array.isArray(runtimeStore.charities)) ? runtimeStore.charities : [];
 
   if (!txs || txs.length === 0) {
     return (
@@ -55,27 +99,26 @@ export default function RecentActivity({ transactions }: RecentActivityProps) {
       <h3 className="font-medium">Recent Activity</h3>
       <ul className="mt-3 space-y-2">
         {txs.slice(0, 8).map((t: any) => {
-          // Title and subtitle
-          let title = 'Activity';
-          let subtitle: string | null = null;
+          // determine label and secondary text
+          let typeLabel = 'Activity';
+          let entity = null;
 
           if (t.type === 'donation' || t.charityId) {
-            const charity = charitiesById[t.charityId] || null;
-            title = `Donation`;
-            subtitle = charity ? charity.name : (t.charityId ?? 'Donation');
+            typeLabel = 'Donation';
+            entity = resolveCharityName(t.charityId, charities) || t.charityId || null;
           } else if (t.type === 'send') {
-            title = 'Send';
-            subtitle = t.counterpartyName || t.counterpartyId || 'Recipient';
-          } else if (t.description) {
-            title = t.description;
+            typeLabel = 'Send';
+            entity = t.counterpartyName || t.counterpartyId || null;
           } else if (t.type) {
-            title = t.type.charAt(0).toUpperCase() + t.type.slice(1);
+            typeLabel = t.type.charAt(0).toUpperCase() + t.type.slice(1);
           }
+
+          const title = entity ? `${typeLabel} — ${entity}` : typeLabel;
 
           return (
             <li key={t.id} className="flex justify-between">
               <div>
-                <div className="font-medium">{title}{subtitle ? ` — ${subtitle}` : ''}</div>
+                <div className="font-medium">{title}</div>
                 {t.note && <div className="text-sm text-muted-foreground">{t.note}</div>}
               </div>
 
@@ -90,4 +133,4 @@ export default function RecentActivity({ transactions }: RecentActivityProps) {
     </Card>
   );
 }
-// --- 93 lines oct 20
+// --- 137 lines oct 20
