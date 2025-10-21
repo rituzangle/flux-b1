@@ -10,59 +10,35 @@
 import { NextResponse } from 'next/server';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { logger } from '@/src/utils/prettyLogs';
+import { buildTransaction, applyTransactionToStore } from '@/src/utils/transactions';
 
 export const dynamic = 'force-dynamic';
 
-type SendBody = {
-  recipientId?: string;
-  recipientName?: string;
-  amount: number;
-  note?: string;
-  userId?: string;
-};
+type SendBody = { recipientId?: string; recipientName?: string; amount: number | string; note?: string; userId?: string; };
 
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null) as SendBody | null;
-    if (!body || typeof body.amount !== 'number' || body.amount <= 0) {
-      logger.warn('send: invalid request body', 'send');
+    if (!body || typeof body.amount === 'undefined') {
+      logger.warn('send: invalid request', 'send');
       return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
     }
 
-    const user = (runtimeStore && runtimeStore.user) || null;
-    if (!user) {
-      logger.warn('send: no runtime user', 'send');
-      return NextResponse.json({ ok: false, error: 'no_user' }, { status: 500 });
-    }
-
-    const amount = Math.max(0, Number(body.amount));
-    const before = Number(user.balance ?? 0);
-    user.balance = Math.max(0, +(before - amount).toFixed(2));
-
-    runtimeStore.transactions = runtimeStore.transactions || [];
-
-    const tx = {
-      id: `tx-send-${Date.now()}`,
-      userId: user.id,
+    const tx = buildTransaction({
       type: 'send',
-      counterpartyId: body.recipientId ?? null,
-      counterpartyName: body.recipientName ?? null,
-      amount,
+      entityId: body.recipientId ?? null,
+      entityName: body.recipientName ?? null,
+      amount: body.amount,
       note: body.note ?? null,
-      timestamp: new Date().toISOString(),
-    };
-
-    runtimeStore.transactions.unshift(tx);
-    if (runtimeStore.transactions.length > 200) runtimeStore.transactions.length = 200;
-
-    logger.info(`send: user ${user.id} sent $${amount} to ${body.recipientName || body.recipientId || 'unknown'}`, 'send');
-
-    return NextResponse.json({
-      ok: true,
-      user: { ...user },
-      tx,
-      recent: runtimeStore.transactions.slice(0, 8),
+      meta: {},
+      userId: undefined,
     });
+
+    const result = applyTransactionToStore(tx, runtimeStore);
+
+    logger.info(`send: user ${result.user?.id ?? 'unknown'} sent $${tx.amount} to ${body.recipientName || body.recipientId}`, 'send');
+
+    return NextResponse.json({ ok: true, ...result });
   } catch (err) {
     logger.error(`send: unexpected error ${String(err)}`, 'send');
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
