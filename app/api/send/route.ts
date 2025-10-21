@@ -6,7 +6,6 @@
  * - Returns { success, transaction, user }
  Update send route: create transaction + update balance
  */
-// app/api/send/route.ts
 import { NextResponse } from 'next/server';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { logger } from '@/src/utils/prettyLogs';
@@ -57,4 +56,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
-// --- 60 lines --- Oct 20, 2025
+// --- 59 lines --- Oct 20, 2025
