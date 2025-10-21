@@ -5,6 +5,9 @@
 //   export NEXT_PUBLIC_SUPABASE_ANON_KEY="anon-key"
 //   export SUPABASE_SERVICE_ROLE_KEY="service-role-key"
 //   ts-node --project tsconfig.scripts.json scripts/check-supabase-safe.ts
+import 'dotenv/config'; // loads .env.local by default for supabase keys
+import { config } from 'dotenv';
+config({ path: '.env.local' });
 
 import clients from '../src/lib/boltDatabaseClient';
 
