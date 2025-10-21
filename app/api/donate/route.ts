@@ -18,7 +18,7 @@ uses server-side service role key via src/lib/supabaseClient.ts.
 */
 // app/api/donate/route.ts
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/src/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
