@@ -83,10 +83,11 @@ export function applyTransactionToStore(tx: any, store?: RuntimeStoreShape) {
   // Update balance consistently: outgoing subtracts, incoming adds
   const balBefore = Number(rs.user?.balance ?? 0);
   const amt = Number(tx.amount || 0);
+  const baseUser = rs.user || { id: 'unknown', name: 'User', email: '', hasCompletedOnboarding: false, firstDonationDate: null, totalDonated: 0, lastWWPromptShown: null, wwPromptDismissedForPayday: false, balance: 0 };
   if (tx.direction === 'outgoing') {
-    rs.user = { ...(rs.user ?? {}), balance: Math.max(0, +(balBefore - amt).toFixed(2)) };
+    rs.user = { ...baseUser, balance: Math.max(0, +(balBefore - amt).toFixed(2)) };
   } else {
-    rs.user = { ...(rs.user ?? {}), balance: +(balBefore + amt).toFixed(2) };
+    rs.user = { ...baseUser, balance: +(balBefore + amt).toFixed(2) };
   }
 
   // Unshift so newest first

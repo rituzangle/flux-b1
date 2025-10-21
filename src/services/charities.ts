@@ -11,21 +11,18 @@ import { runtimeStore } from '@/src/mocks/runtimeStore';
 function loadMockModule(): { mockList: Charity[] } {
   // First try direct ES imports (TypeScript/Next alias)
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const m = require('@/src/mocks/charities');
     const list = (m && (m.mockCharities ?? m.charities)) || [];
     return { mockList: list as Charity[] };
   } catch (e1) {
     // Try relative path from project root CommonJS
     try {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const m2 = require('./src/mocks/charities');
       const list2 = (m2 && (m2.mockCharities ?? m2.charities)) || [];
       return { mockList: list2 as Charity[] };
     } catch (e2) {
       // Try alternative relative path used by some workflows
       try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const m3 = require('./mocks/charities');
         const list3 = (m3 && (m3.mockCharities ?? m3.charities)) || [];
         return { mockList: list3 as Charity[] };

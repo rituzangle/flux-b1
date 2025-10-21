@@ -41,8 +41,13 @@ export async function processDonation(
   );
 
   if (useMock) {
+    const { mockCharities } = await MOCK_MODULES.charities();
     const { generateMockInsights } = await MOCK_MODULES.donations();
-    const insights = generateMockInsights(payload.charityId, payload.amount);
+    const charity = mockCharities.find(c => c.id === payload.charityId);
+    if (!charity) {
+      throw new Error(`Charity not found: ${payload.charityId}`);
+    }
+    const insights = generateMockInsights(Number(payload.amount), charity);
     const result = { success: true, insights };
     logger.debug(`API.processDonation: mock result=${JSON.stringify(result)}`, 'API');
     return result;

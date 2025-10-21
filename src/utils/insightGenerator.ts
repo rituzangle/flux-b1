@@ -74,7 +74,8 @@ export function generateDynamicInsights(
  * Convert impact numbers to human narratives
  * "20 meals" → "That's 3 days of food for a family"
  */
-function getImpactNarrative(metric: string, count: number): string {
+function getImpactNarrative(metric: string | undefined, count: number): string {
+  if (!metric) return `You contributed ${count} units`;
   const narratives: Record<string, (n: number) => string> = {
     meals: (n) => {
       if (n < 10) return 'That\'s a quick meal';

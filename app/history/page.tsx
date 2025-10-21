@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTransactions } from '@/src/utils/api';
+import { fetchTransactions } from '@/src/utils/api';
 import { Transaction } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
 import { ArrowUpRight, ArrowDownLeft, HandHeart } from 'lucide-react';
@@ -20,7 +20,7 @@ export default function HistoryPage() {
     async function loadTransactions() {
       logger.info('Loading transaction history', 'HistoryPage');
       try {
-        const data = await getTransactions();
+        const data = await fetchTransactions();
         logger.info(`Loaded ${data.length} transactions`, 'HistoryPage');
         setTransactions(data);
       } catch (error) {

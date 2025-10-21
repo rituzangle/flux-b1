@@ -11,7 +11,10 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",
-    "check:supabase": "NODE_OPTIONS='-r dotenv/config' ts-node --project tsconfig.scripts.json scripts/check-supabase-safe.ts"
+    "check:supabase": "NODE_OPTIONS='-r dotenv/config' ts-node --project tsconfig.scripts.json scripts/check-supabase-safe.ts",
+    "db:seed-charities": "node scripts/seed-charities-supabase.js",
+    "db:create-user": "node scripts/create-test-user.js",
+    "db:test-transactions": "node scripts/test-transactions-supabase.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",

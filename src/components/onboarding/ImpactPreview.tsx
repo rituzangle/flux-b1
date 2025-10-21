@@ -10,7 +10,7 @@ interface ImpactPreviewProps {
 }
 
 export default function ImpactPreview({ amount, charity }: ImpactPreviewProps) {
-  const targetImpact = Math.floor(amount * charity.impactRate);
+  const targetImpact = Math.floor(amount * (charity.impactRate || 0));
   const [displayImpact, setDisplayImpact] = useState(0);
 
   useEffect(() => {

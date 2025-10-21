@@ -1,7 +1,7 @@
 // app/api/bill/route.ts
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/utils/prettyLogs';
+import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
+import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,18 +33,18 @@ export async function POST(req: Request) {
       insights: null,
     };
 
-    const { data: txIns, error: txErr } = await supabase.from('transactions').insert(txRow).select().limit(1).single();
+    const { data: txIns, error: txErr } = await supabaseAdmin.from('transactions').insert(txRow).select().limit(1).single();
     if (txErr) {
       logger.error('bill: tx insert failed ' + String(txErr), 'bill');
       return NextResponse.json({ ok: false, error: 'insert_failed' }, { status: 500 });
     }
 
-    const { data: u } = await supabase.from('app_users').select('*').eq('id', body.userId).limit(1).single();
+    const { data: u } = await supabaseAdmin.from('app_users').select('*').eq('id', body.userId).maybeSingle();
     if (!u) return NextResponse.json({ ok: false, error: 'no_user' }, { status: 404 });
     const newBalance = Math.max(0, Number(u.balance) - amount);
-    const { data: uu } = await supabase.from('app_users').update({ balance: newBalance }).eq('id', body.userId).select().limit(1).single();
+    const { data: uu } = await supabaseAdmin.from('app_users').update({ balance: newBalance }).eq('id', body.userId).select().maybeSingle();
 
-    const { data: recent } = await supabase.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
+    const { data: recent } = await supabaseAdmin.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
 
     return NextResponse.json({ ok: true, user: uu, tx: txIns, recent });
   } catch (err) {

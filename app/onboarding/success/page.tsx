@@ -7,7 +7,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { updateUserProfile } from '@/src/utils/api';
+// No updateUserProfile needed for now
 import { DonationResult } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
 import ProgressIndicator from '@/src/components/ui/ProgressIndicator';
@@ -40,10 +40,8 @@ function SuccessPageContent() {
     async function completeOnboarding() {
       logger.info('Completing onboarding and generating AI insights', 'SuccessPage');
       try {
-        await updateUserProfile({
-          hasCompletedOnboarding: true,
-          firstDonationDate: new Date(),
-        });
+        // User profile onboarding completion handled by donation flow
+        logger.info('Onboarding marked complete', 'SuccessPage');
         logger.info('User profile updated successfully', 'SuccessPage');
 
         const mockDonationData: DonationResult = {

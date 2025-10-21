@@ -3,7 +3,7 @@
  Ensure API transactions route returns runtimeStore.transactions
  */
 import { NextResponse } from 'next/server';
-import { supabase } from '@/src/lib/supabaseClient';
+import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,7 +40,7 @@ export async function GET(req: Request) {
     const pageSize = Math.min(100, toInt(params.pageSize, 20));
     const offset = (page - 1) * pageSize;
 
-    let query = supabase
+    let query = supabaseAdmin
       .from('transactions')
       .select('id,user_id,type,category,entity_id,entity_name,amount,direction,note,timestamp,meta,insights', { count: 'exact' })
       .eq('user_id', params.userId)

@@ -3,6 +3,7 @@ export interface Charity {
   name: string;
   description: string;
   logoUrl?: string;
+  logo?: string;
   website?: string;
   emoji?: string;
   verified?: boolean;
@@ -34,6 +35,7 @@ export interface User {
   totalDonated: number;
   lastWWPromptShown: Date | null;
   wwPromptDismissedForPayday: boolean;
+  donationCount?: number;
 }
 export interface AIInsight {
   icon: string;
@@ -65,6 +67,6 @@ export interface Transaction {
   charity?: Charity;
 }
 
-export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'disabled';
+export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'disabled' | 'outline';
 export type CardVariant   = 'default' | 'elevated' | 'selectable' | 'glass';
 export type WWPromptMode  = 'prominent' | 'subtle' | 'hidden';

@@ -6,7 +6,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUserProfile } from '@/src/utils/api';
+import { fetchUser } from '@/src/utils/api';
 import { User } from '@/src/utils/types';
 import { logger } from '@/src/utils/prettyLogs';
 import Card from '@/src/components/ui/Card';
@@ -20,7 +20,7 @@ export default function SettingsPage() {
     async function loadUser() {
       logger.info('Loading user profile', 'SettingsPage');
       try {
-        const userData = await getUserProfile();
+        const userData = await fetchUser();
         logger.info(`Loaded user: ${userData.email}`, 'SettingsPage');
         setUser(userData);
       } catch (error) {

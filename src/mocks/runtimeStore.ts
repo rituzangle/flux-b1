@@ -14,19 +14,16 @@ import type { Charity, User } from '@/src/utils/types';
 // tolerant loader for seed charities (won't throw)
 function loadMockCharities(): Charity[] {
   try { // prefer Next alias (when used inside Next runtime)
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const m = require('@/src/mocks/charities');
     return (m && (m.mockCharities ?? m.charities ?? m.default)) || [];
   } catch (e1) {
     try {
       // fallback to relative source path
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const m2 = require('@/src/mocks/charities');
       return (m2 && (m2.mockCharities ?? m2.charities ?? m2.default)) || [];
     } catch (e2) {
       try {
         // another fallback
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         const m3 = require('@/src/mocks/charities');
         return (m3 && (m3.mockCharities ?? m3.charities ?? m3.default)) || [];
       } catch {
@@ -68,10 +65,7 @@ function makeInitialStore(): RuntimeStoreShape {
 const GLOBAL_KEY = '__FLUX_DEV_RUNTIME_STORE__' as const;
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-  interface GlobalThis {
-    [GLOBAL_KEY]?: RuntimeStoreShape;
-  }
+  var __FLUX_DEV_RUNTIME_STORE__: RuntimeStoreShape | undefined;
 }
 
 if (!globalThis[GLOBAL_KEY]) {

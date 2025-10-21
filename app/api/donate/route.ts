@@ -18,7 +18,7 @@ uses server-side service role key via src/lib/supabaseClient.ts.
 */
 // app/api/donate/route.ts
 import { NextResponse } from 'next/server';
-import { supabase } from '@/src/lib/supabaseClient';
+import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
     // Resolve charity metadata to build insight and pass meta where helpful
     let charity: any = null;
     if (body.charityId) {
-      const { data: c, error: cErr } = await supabase.from('charities').select('id,name,impact_rate,impact_metric').eq('id', body.charityId).limit(1).single();
+      const { data: c, error: cErr } = await supabaseAdmin.from('charities').select('id,name,impact_rate,impact_metric').eq('id', body.charityId).maybeSingle();
       if (cErr) {
         // log and continue with null charity but do not fail the donation
         console.warn('donate: failed to load charity metadata', cErr);
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       p_meta: body.meta ? body.meta : charity ? { impactRate: charity.impact_rate, impactMetric: charity.impact_metric } : null,
     };
 
-    const { data: rpcData, error: rpcError } = await supabase.rpc('atomic_apply_donation', rpcParams as any);
+    const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('atomic_apply_donation', rpcParams as any);
 
     if (rpcError) {
       console.error('donate: rpc failed', rpcError);
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     }
 
     // fetch recent transactions for the user to power UI immediately
-    const { data: recent, error: recentErr } = await supabase
+    const { data: recent, error: recentErr } = await supabaseAdmin
       .from('transactions')
       .select('*')
       .eq('user_id', body.userId)

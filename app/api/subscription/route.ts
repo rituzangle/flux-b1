@@ -2,7 +2,7 @@
 //create subscription payment or subscription record
 
 import { NextResponse } from 'next/server';
-import { supabase } from '@/src/lib/supabaseClient';
+import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
 import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       metadata: { note: body.note ?? null },
     };
 
-    const { data: subIns, error: subErr } = await supabase.from('subscriptions').insert(subRow).select().limit(1).single();
+    const { data: subIns, error: subErr } = await supabaseAdmin.from('subscriptions').insert(subRow).select().limit(1).single();
     if (subErr) {
       logger.error('subscription: insert failed ' + String(subErr), 'subscription');
       return NextResponse.json({ ok: false, error: 'insert_failed' }, { status: 500 });
@@ -57,20 +57,20 @@ export async function POST(req: Request) {
         meta: { cadence: subRow.cadence },
         insights: null,
       };
-      const { data: t, error: tErr } = await supabase.from('transactions').insert(txRow).select().limit(1).single();
+      const { data: t, error: tErr } = await supabaseAdmin.from('transactions').insert(txRow).select().limit(1).single();
       if (tErr) {
         logger.error('subscription: tx insert failed ' + String(tErr), 'subscription');
       } else {
         txIns = t;
-        const { data: u } = await supabase.from('app_users').select('*').eq('id', body.userId).limit(1).single();
+        const { data: u } = await supabaseAdmin.from('app_users').select('*').eq('id', body.userId).maybeSingle();
         if (u) {
           const newBalance = Math.max(0, Number(u.balance) - amount);
-          await supabase.from('app_users').update({ balance: newBalance }).eq('id', body.userId);
+          await supabaseAdmin.from('app_users').update({ balance: newBalance }).eq('id', body.userId);
         }
       }
     }
 
-    const { data: recent } = await supabase.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
+    const { data: recent } = await supabaseAdmin.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
 
     return NextResponse.json({ ok: true, subscription: subIns, tx: txIns, recent });
   } catch (err) {
