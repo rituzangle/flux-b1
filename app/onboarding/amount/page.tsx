@@ -2,7 +2,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { logger } from '@/utils/prettyLogs';
 import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
