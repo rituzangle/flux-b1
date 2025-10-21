@@ -1,7 +1,7 @@
 /* 
 Path: app/api/donate/route.ts
 Purpose: ensure donate mutates runtimeStore, computes insight from charity + amount, and returns updated user + recent transactions.
-*/
+*/// app/api/donate/route.ts
 import { NextResponse } from 'next/server';
 import { runtimeStore } from '@/src/mocks/runtimeStore';
 import { getCharityById } from '@/src/services/charities';
@@ -9,7 +9,12 @@ import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
-type DonateBody = { charityId: string; amount: number; note?: string; userId?: string; };
+type DonateBody = { charityId: string; amount: number | string; note?: string; userId?: string; };
+
+function toNumber(val: number | string) {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : 0;
+}
 
 function makeInsight(charity: any, amount: number) {
   if (!charity) return 'Thank you for supporting this cause.';
@@ -22,7 +27,7 @@ function makeInsight(charity: any, amount: number) {
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => null) as DonateBody | null;
-    if (!body || typeof body.amount !== 'number' || !body.charityId) {
+    if (!body || !body.charityId) {
       logger.warn('donate: invalid request', 'donate');
       return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
     }
@@ -33,20 +38,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'no_user' }, { status: 500 });
     }
 
-    const amount = Math.max(0, Number(body.amount));
+    const amount = Math.max(0, toNumber(body.amount));
     const before = Number(user.balance ?? 0);
-    user.balance = Math.max(0, +(before - amount).toFixed(2));
+    const after = Math.max(0, +(before - amount).toFixed(2));
+    user.balance = after;
 
     runtimeStore.transactions = runtimeStore.transactions || [];
     const tx = {
       id: `tx-${Date.now()}`,
       userId: user.id,
       charityId: body.charityId,
-      amount,
+      amount: Number(amount),
       note: body.note ?? null,
       timestamp: new Date().toISOString(),
       type: 'donation',
     };
+
     runtimeStore.transactions.unshift(tx);
     if (runtimeStore.transactions.length > 200) runtimeStore.transactions.length = 200;
 
@@ -67,4 +74,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
+
 // --- 67 lines 
