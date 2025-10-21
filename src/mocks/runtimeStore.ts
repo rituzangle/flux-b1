@@ -3,7 +3,7 @@
 // This file uses tolerant require fallbacks so Node scripts (logFlow.js) can load mocks
 // even when TS path aliases or ESM imports are not available in the quick runtime.
 
-import type { Charity, User } from '@/utils/types';
+import type { Charity, User } from '@/src/utils/types';
 
 // Helper to load mock charities with multiple fallbacks so both Node require() and
 // Next's TS imports will resolve a usable array.
