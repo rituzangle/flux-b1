@@ -11,13 +11,13 @@
 // so every runtime (server handlers, client dev imports, node debug scripts)
 // see and mutate the exact same object during local development.
 
-import type { Charity, User } from '@/utils/types';
+import type { Charity, User } from '@/src/utils/types';
 
 // tolerant loader for seed charities (won't throw)
 function loadMockCharities(): Charity[] {
   try { // prefer Next alias (when used inside Next runtime)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const m = require('@/mocks/charities');
+    const m = require('@/src/mocks/charities');
     return (m && (m.mockCharities ?? m.charities ?? m.default)) || [];
   } catch (e1) {
     try {
@@ -29,7 +29,7 @@ function loadMockCharities(): Charity[] {
       try {
         // another fallback
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const m3 = require('./mocks/charities');
+        const m3 = require('./src/mocks/charities');
         return (m3 && (m3.mockCharities ?? m3.charities ?? m3.default)) || [];
       } catch {
         return [];
