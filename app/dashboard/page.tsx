@@ -7,7 +7,8 @@
  * - Lists recent activity
  * - Loads data via utils/api with mock/real toggle
  * - Structured logging for observability
- */// app/dashboard/page.tsx// app/dashboard/page.tsx
+ */
+// app/dashboard/page.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -19,19 +20,28 @@ import { runtimeStore } from '@/src/mocks/runtimeStore';
 import Card from '@/src/components/ui/Card';
 import { logger } from '@/src/utils/prettyLogs';
 
+function safeDate(ts: any) {
+  try {
+    if (!ts) return '—';
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString();
+  } catch {
+    return '—';
+  }
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(() => (runtimeStore && runtimeStore.user) ?? null);
   const [transactions, setTransactions] = useState<any[]>(() => (runtimeStore && runtimeStore.transactions) ?? []);
   const [loading, setLoading] = useState(false);
 
-  // Try one-time fetch from API, then poll runtimeStore as a reliable dev fallback
   useEffect(() => {
     let mounted = true;
     async function loadFromApi() {
       setLoading(true);
       try {
-        // Prefer networked helpers if present
         const u = typeof fetchUser === 'function' ? await fetchUser().catch(() => null) : null;
         const tx = typeof fetchTransactions === 'function' ? await fetchTransactions().catch(() => []) : null;
 
@@ -40,7 +50,7 @@ export default function DashboardPage() {
           if (Array.isArray(tx)) setTransactions(tx);
         }
       } catch (e) {
-        logger.debug('dashboard: API fetch failed, falling back to runtimeStore', 'dashboard');
+        logger.debug('dashboard: API fetch failed, fallback to runtimeStore', 'dashboard');
       } finally {
         if (mounted) setLoading(false);
       }
@@ -48,7 +58,6 @@ export default function DashboardPage() {
 
     loadFromApi();
 
-    // Lightweight polling so runtimeStore mutations (dev) show up without reload
     const interval = setInterval(() => {
       if (!mounted) return;
       try {
@@ -56,16 +65,16 @@ export default function DashboardPage() {
         const rsTx = (runtimeStore && runtimeStore.transactions) ?? [];
         if (rsUser) setUser(rsUser);
         if (Array.isArray(rsTx)) setTransactions(rsTx);
-      } catch (e) {
+      } catch {
         // ignore
       }
     }, 700);
 
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-    };
+    return () => { mounted = false; clearInterval(interval); };
   }, []);
+
+  // Ensure displayed balance is numeric and non-negative
+  const displayBalance = user ? (Number.isFinite(Number(user.balance)) ? Math.max(0, Number(user.balance)) : 0) : 0;
 
   const onSend = () => router.push('/send');
   const onDiscover = () => router.push('/onboarding');
@@ -81,25 +90,19 @@ export default function DashboardPage() {
         <Card>
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex-1">
-              {/* Use existing BalanceCard if available; fallback to inline display */}
-              {BalanceCard ? (
-                <BalanceCard user={user} />
-              ) : (
+              {BalanceCard ? <BalanceCard user={{ ...user, balance: displayBalance }} /> : (
                 <div>
-                  <div className="text-sm text-muted-foreground">Balance</div>
-                  <div className="text-2xl font-semibold">${user ? Number(user.balance).toFixed(2) : '0.00'}</div>
+                  <div className="text-sm text-muted-foreground">Available Balance</div>
+                  <div className="text-2xl font-semibold">${displayBalance.toFixed(2)}</div>
                 </div>
               )}
             </div>
 
             <div className="mt-4 md:mt-0 md:ml-4">
-              {/* QuickActions component if present; otherwise render buttons */}
-              {QuickActions ? (
-                <QuickActions onSend={onSend} onDiscover={onDiscover} />
-              ) : (
+              {QuickActions ? <QuickActions onSend={onSend} onDiscover={onDiscover} /> : (
                 <div className="flex gap-2">
                   <button onClick={onSend} className="px-3 py-2 border rounded">Send</button>
-                  <button onClick={onDiscover} className="px-3 py-2 border rounded">Discover causes</button>
+                  <button onClick={onDiscover} className="px-3 py-2 border rounded">Donate</button>
                 </div>
               )}
             </div>
@@ -108,31 +111,26 @@ export default function DashboardPage() {
 
         <Card>
           <h3 className="font-medium">Recent Activity</h3>
-          {/* Prefer RecentActivity component; if not available, render simple list */}
-          {RecentActivity ? (
-            <RecentActivity transactions={transactions} />
-          ) : (
-            <div className="mt-3">
-              {transactions && transactions.length > 0 ? (
-                <ul className="space-y-2">
-                  {transactions.slice(0, 8).map((t: any) => (
-                    <li key={t.id} className="flex justify-between">
-                      <div>
-                        <div className="font-medium">{t.charityId ?? (t.counterpartyName ?? 'Activity')}</div>
-                        {t.note && <div className="text-sm text-muted-foreground">{t.note}</div>}
-                      </div>
-                      <div className="text-right">
-                        <div>${Number(t.amount).toFixed(2)}</div>
-                        <div className="text-xs text-muted-foreground">{new Date(t.timestamp).toLocaleString()}</div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-muted-foreground mt-3">No recent activity.</p>
-              )}
-            </div>
-          )}
+          <div className="mt-3">
+            {transactions && transactions.length > 0 ? (
+              <ul className="space-y-2">
+                {transactions.slice(0, 8).map((t: any) => (
+                  <li key={t.id} className="flex justify-between">
+                    <div>
+                      <div className="font-medium">{t.charityId ?? (t.counterpartyName ?? 'Activity')}</div>
+                      {t.note && <div className="text-sm text-muted-foreground">{t.note}</div>}
+                    </div>
+                    <div className="text-right">
+                      <div className={`${t.amount < 0 ? 'text-red-600' : ''}`}>${Number(t.amount).toFixed(2)}</div>
+                      <div className="text-xs text-muted-foreground">{safeDate(t.timestamp)}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground mt-3">No recent activity.</p>
+            )}
+          </div>
         </Card>
       </section>
     </main>
