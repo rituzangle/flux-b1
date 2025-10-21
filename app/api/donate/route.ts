@@ -1,73 +1,77 @@
-/* 
-Path: app/api/donate/route.ts
-Purpose: ensure donate mutates runtimeStore, computes insight from charity + amount, and returns updated user + recent transactions.
-*/
 // app/api/donate/route.ts
 import { NextResponse } from 'next/server';
-import { runtimeStore } from '@/src/mocks/runtimeStore';
-import { getCharityById } from '@/src/services/charities';
+import { supabase } from '@/src/lib/supabaseClient';
 import { logger } from '@/src/utils/prettyLogs';
-import { buildTransaction, applyTransactionToStore } from '@/src/utils/transactions';
 
 export const dynamic = 'force-dynamic';
 
-type DonateBody = { charityId?: string; amount?: number | string; note?: string; userId?: string; };
+type Body = { userId: string; charityId: string; amount: number | string; note?: string };
+
+function toNum(v: any) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => null) as DonateBody | null;
-    if (!body || !body.charityId) {
-      logger.warn('donate: invalid request body', 'donate');
+    const body = await req.json().catch(() => null) as Body | null;
+    if (!body || !body.userId || !body.charityId) {
       return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
     }
 
-    const amount = typeof body.amount === 'undefined' ? 0 : Number(body.amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      logger.warn('donate: invalid amount', 'donate');
-      return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
-    }
+    const amount = Math.max(0, toNum(body.amount));
+    if (amount <= 0) return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
 
-    const charity = getCharityById(body.charityId);
-    const charityName = charity?.name ?? null;
+    // Resolve charity for entity_name and impact meta
+    const { data: charity } = await supabase.from('charities').select('*').eq('id', body.charityId).limit(1).single();
+    const entityName = charity?.name ?? null;
+    const meta = { impactRate: charity?.impact_rate ?? null, impactMetric: charity?.impact_metric ?? null };
 
-    const tx = buildTransaction({
+    // Build tx row
+    const txRow = {
+      user_id: body.userId,
       type: 'donation',
-      entityId: body.charityId,
-      entityName: charityName,
-      amount,
+      category: 'charity',
+      entity_id: body.charityId,
+      entity_name: entityName,
+      amount: amount,
+      direction: 'outgoing',
       note: body.note ?? null,
-      meta: { impactRate: charity?.impactRate, impactMetric: charity?.impactMetric },
-      userId: undefined,
-    });
+      meta,
+      insights: null,
+    };
 
-    const result = applyTransactionToStore(tx, runtimeStore);
-
-    // Compute a compact insights array for the response (safe, non-hardcoded)
-    const insights: string[] = [];
-    try {
-      if (charity && Number(charity.impactRate)) {
-        const rate = Number(charity.impactRate) || 1;
-        const impactCount = Math.max(1, Math.floor(Number(tx.amount) / rate));
-        const metric = charity.impactMetric ?? 'people';
-        insights.push(`You helped ${impactCount} ${metric} with your gift to ${charityName}.`);
-      }
-    } catch {
-      // ignore insight generation errors
+    // Insert transaction
+    const { data: txIns, error: txErr } = await supabase.from('transactions').insert(txRow).select().limit(1).single();
+    if (txErr) {
+      logger.error('donate: tx insert failed ' + String(txErr), 'donate');
+      return NextResponse.json({ ok: false, error: 'insert_failed' }, { status: 500 });
     }
 
-    logger.info(`donate: user ${result.user?.id ?? 'unknown'} donated $${tx.amount} to ${body.charityId}`, 'donate');
+    // Update user balance and total_donated
+    const update = await supabase.rpc('atomic_apply_donation', { p_user_id: body.userId, p_amount: amount }).catch(() => null);
 
-    return NextResponse.json({
-      ok: true,
-      user: { ...result.user },
-      tx,
-      recent: result.recent,
-      insights,
-    });
+    // Fallback if RPC not available: update user balance and total_donated conservatively
+    let user: any = null;
+    if (update && update.data) {
+      user = update.data;
+    } else {
+      // read user, compute and update
+      const { data: u } = await supabase.from('app_users').select('*').eq('id', body.userId).limit(1).single();
+      if (!u) return NextResponse.json({ ok: false, error: 'no_user' }, { status: 404 });
+      const newBalance = Math.max(0, Number(u.balance) - amount);
+      const newTotalDonated = Number(u.total_donated ?? 0) + amount;
+      const { data: uu } = await supabase.from('app_users').update({ balance: newBalance, total_donated: newTotalDonated }).eq('id', body.userId).select().limit(1).single();
+      user = uu;
+    }
+
+    // Fetch recent transactions for this user
+    const { data: recent } = await supabase.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
+
+    return NextResponse.json({ ok: true, user, tx: txIns, recent });
   } catch (err) {
-    logger.error('donate: unexpected error ' + String(err), 'donate');
+    logger.error('donate: unexpected ' + String(err), 'donate');
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
-
-// --- 84 lines 
+// --- 76 lines 
