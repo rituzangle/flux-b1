@@ -14,7 +14,7 @@ if (!SUPABASE_URL || !SERVICE_KEY) {
 }
 
 // Change this to the actual path or require of your mocks file
-const mocksPath = './src/mock/charities.js'; // or .json
+const mocksPath = '../src/mock/charities.js'; // or .json
 let mocks;
 try {
   mocks = require(mocksPath);
