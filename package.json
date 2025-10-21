@@ -10,7 +10,8 @@
     "clean": "clear;rm -rf package-lock.json .next node_modules && npm install && npm run dev",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "check:supabase": "NODE_OPTIONS='-r dotenv/config' ts-node --project tsconfig.scripts.json scripts/check-supabase-safe.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.75.0",
