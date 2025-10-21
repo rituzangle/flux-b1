@@ -2,10 +2,8 @@
 // In-memory runtime store for dev mode. Not persisted across restarts.
 // This file uses tolerant require fallbacks so Node scripts (logFlow.js) can load mocks
 // even when TS path aliases or ESM imports are not available in the quick runtime.
-// src/mocks/runtimeStore.ts
 // In-memory runtime store for dev mode.
 // Works with both Next (ESM/TS imports) and plain Node require() by exposing CommonJS exports.
-// src/mocks/runtimeStore.ts
 // Canonical in-memory runtime store for dev.
 // Single source of truth exposed as both ESM export and attached to globalThis
 // so every runtime (server handlers, client dev imports, node debug scripts)
@@ -23,7 +21,7 @@ function loadMockCharities(): Charity[] {
     try {
       // fallback to relative source path
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const m2 = require('./src/mocks/charities');
+      const m2 = require('@/src/mocks/charities');
       return (m2 && (m2.mockCharities ?? m2.charities ?? m2.default)) || [];
     } catch (e2) {
       try {
