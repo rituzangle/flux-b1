@@ -5,74 +5,95 @@
 // src/mocks/runtimeStore.ts
 // In-memory runtime store for dev mode.
 // Works with both Next (ESM/TS imports) and plain Node require() by exposing CommonJS exports.
+// src/mocks/runtimeStore.ts
+// Canonical in-memory runtime store for dev.
+// Single source of truth exposed as both ESM export and attached to globalThis
+// so every runtime (server handlers, client dev imports, node debug scripts)
+// see and mutate the exact same object during local development.
 
-import type { Charity, User } from '@/src/utils/types';
+import type { Charity, User } from '@/utils/types';
 
-// Tolerant loader: try multiple require/import paths to find the mock charities.
-// Returns an array (possibly empty) and never throws.
+// tolerant loader for seed charities (won't throw)
 function loadMockCharities(): Charity[] {
-  try {
-    // Try TS/Next alias (works inside Next runtime)
+  try { // prefer Next alias (when used inside Next runtime)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const m = require('@/src/mocks/charities');
+    const m = require('@/mocks/charities');
     return (m && (m.mockCharities ?? m.charities ?? m.default)) || [];
   } catch (e1) {
     try {
-      // Try common relative path from project root
+      // fallback to relative source path
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const m2 = require('./src/mocks/charities');
       return (m2 && (m2.mockCharities ?? m2.charities ?? m2.default)) || [];
     } catch (e2) {
       try {
-        // Try other relative path used by some scripts
+        // another fallback
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const m3 = require('./src/mocks/charities');
+        const m3 = require('./mocks/charities');
         return (m3 && (m3.mockCharities ?? m3.charities ?? m3.default)) || [];
-      } catch (e3) {
-        // No mocks found — return empty array
+      } catch {
         return [];
       }
     }
   }
 }
 
-const seededCharities: Charity[] = loadMockCharities();
+const seededCharities = loadMockCharities();
 
-export const runtimeStore: {
+export type RuntimeStoreShape = {
   user: User | null;
-  transactions: any[];
+  transactions: Array<any>;
   charities: Charity[];
-} = {
-  user: {
-    id: 'user_dev_1',
-    name: 'Dev User',
-    email: 'dev@example.test',
-    balance: 1250.0,
-    hasCompletedOnboarding: false,
-    firstDonationDate: null,
-    totalDonated: 0,
-    lastWWPromptShown: null,
-    wwPromptDismissedForPayday: false,
-  } as User,
-  transactions: [],
-  charities: seededCharities,
 };
 
-export function applySeed(seed: Partial<typeof runtimeStore>) {
+function makeInitialStore(): RuntimeStoreShape {
+  return {
+    user: {
+      id: 'user_dev_1',
+      name: 'Dev User',
+      email: 'dev@example.test',
+      balance: 1250.0,
+      hasCompletedOnboarding: false,
+      firstDonationDate: null,
+      totalDonated: 0,
+      lastWWPromptShown: null,
+      wwPromptDismissedForPayday: false,
+    } as User,
+    transactions: [],
+    charities: seededCharities,
+  };
+}
+
+// Use globalThis to ensure a single instance across module systems in dev.
+// This avoids duplicate runtimeStore objects when files are required/imported
+// with different resolvers during local development.
+const GLOBAL_KEY = '__FLUX_DEV_RUNTIME_STORE__' as const;
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface GlobalThis {
+    [GLOBAL_KEY]?: RuntimeStoreShape;
+  }
+}
+
+if (!globalThis[GLOBAL_KEY]) {
+  globalThis[GLOBAL_KEY] = makeInitialStore();
+}
+
+export const runtimeStore: RuntimeStoreShape = globalThis[GLOBAL_KEY] as RuntimeStoreShape;
+
+export function applySeed(seed: Partial<RuntimeStoreShape>) {
   if (!seed) return;
   if (seed.user) runtimeStore.user = { ...((runtimeStore.user as User) || {}), ...seed.user } as User;
   if (Array.isArray(seed.transactions)) runtimeStore.transactions = seed.transactions;
-  if (Array.isArray(seed.charities)) runtimeStore.charities = seed.charities as Charity[];
+  if (Array.isArray(seed.charities)) runtimeStore.charities = seed.charities;
 }
 
-// CommonJS compatibility so plain `require('src/mocks/runtimeStore')` works in Node scripts
+// CommonJS compatibility for tools that use require() referencing this same file path.
+// This line does not create a separate instance — it simply exposes the same object.
 declare const module: any;
 if (typeof module !== 'undefined' && module.exports) {
-  try {
-    module.exports = Object.assign(module.exports || {}, { runtimeStore, applySeed });
-  } catch {
-    // ignore
-  }
+  try { module.exports = Object.assign(module.exports || {}, { runtimeStore, applySeed }); } catch {}
 }
 
 // --- 64 lines --- oct 20
