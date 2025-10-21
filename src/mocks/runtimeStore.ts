@@ -27,7 +27,7 @@ function loadMockCharities(): Charity[] {
       try {
         // another fallback
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const m3 = require('./src/mocks/charities');
+        const m3 = require('@/src/mocks/charities');
         return (m3 && (m3.mockCharities ?? m3.charities ?? m3.default)) || [];
       } catch {
         return [];
