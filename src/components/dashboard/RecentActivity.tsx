@@ -1,4 +1,14 @@
 // src/components/dashboard/RecentActivity.tsx
+/* RecentActivity component so each transaction shows a clear title:
+
+For donations: show the charity name (lookup by charityId).
+
+For sends: show the counterpartyName or "Sent".
+
+For other types: show a readable type label or fallback to "Activity".
+
+This single-file replacement reads the current transactions, looks up charities from the canonical runtimeStore, formats amounts and dates safely, and preserves your styling and component imports.
+*/
 'use client';
 import React from 'react';
 import Card from '@/src/components/ui/Card';
