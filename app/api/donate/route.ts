@@ -1,4 +1,10 @@
 // app/api/donate/route.ts
+/* 
+
+uses the shared Supabase client at src/lib/supabaseClient.ts.
+uses server-side service role key via src/lib/supabaseClient.ts.
+*/
+
 import { NextResponse } from 'next/server';
 import { supabase } from '@/src/lib/supabaseClient';
 import { logger } from '@/src/utils/prettyLogs';
