@@ -2,8 +2,8 @@
 // Helper to build canonical transaction objects and apply them to runtimeStore.
 // Centralizes numeric coercion, timestamping, direction, balance update and meta.
 
-import { runtimeStore } from '@/mocks/runtimeStore';
-import type { RuntimeStoreShape } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
+import type { RuntimeStoreShape } from '@/src/mocks/runtimeStore';
 
 type BuildTxOpts = {
   type: 'donation' | 'send' | 'bill' | 'subscription' | 'refund' | 'reward' | 'adjustment' | string;
@@ -95,3 +95,4 @@ export function applyTransactionToStore(tx: any, store?: RuntimeStoreShape) {
 
   return { user: { ...rs.user }, tx, recent: rs.transactions.slice(0, 8) };
 }
+// --- 98 lines --- Oct 20
