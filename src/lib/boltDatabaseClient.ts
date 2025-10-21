@@ -1,7 +1,8 @@
-// src/lib/boltDatabaseClient.ts
-// Exports two Supabase clients: server (service role) and client (anon).
-// Uses environment vars and performs runtime validation for required secrets.
-
+/** 
+ src/lib/boltDatabaseClient.ts
+ Exports two Supabase clients: server (service role) and client (anon).
+ Uses environment vars and performs runtime validation for required secrets.
+*/
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 type Clients = {
@@ -47,3 +48,4 @@ const clients: Clients = {
 };
 
 export default clients;
+// --- 51 lines --- Oct 21
