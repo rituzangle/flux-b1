@@ -11,7 +11,7 @@ function loadMockCharities(): Charity[] {
   try {
     // Try TypeScript/Next alias import at runtime (this will work when compiled by Next)
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const m = require('@/mocks/charities');
+    const m = require('@/src/mocks/charities');
     return (m && (m.mockCharities ?? m.charities)) || [];
   } catch (e1) {
     try {
@@ -23,7 +23,7 @@ function loadMockCharities(): Charity[] {
       try {
         // Try another common relative path
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const m3 = require('./mocks/charities');
+        const m3 = require('./src/mocks/charities');
         return (m3 && (m3.mockCharities ?? m3.charities)) || [];
       } catch (e3) {
         // Fallback: empty list
