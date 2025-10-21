@@ -3,7 +3,7 @@
  Ensure API transactions route returns runtimeStore.transactions
  */
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lsrc/ib/supabaseClient';
+import { supabase } from '@/src/lib/supabaseClient';
 
 export const dynamic = 'force-dynamic';
 
