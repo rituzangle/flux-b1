@@ -1,14 +1,17 @@
-// scripts/test-transactions.js
-// Usage:
-//   NODE_API_BASE="https://your-app.bolt.dev" NODE_USER_ID="7db3864f-266a-4744-9d64-753abc9598a0" node scripts/test-transactions.js
-//
-// Environment variables:
-//   NODE_API_BASE  - required, base URL of your Bolt app (no trailing slash)
-//   NODE_USER_ID   - required, the user UUID to query
-//   NODE_PAGE      - optional, default 1
-//   NODE_PAGE_SIZE - optional, default 8
-//   NODE_TYPE      - optional filter, e.g., "donation"
-//
+/* 
+scripts/test-transactions.js
+Usage:
+  NODE_API_BASE="https://your-app.bolt.dev" NODE_USER_ID="7db3864f-266a-4744-9d64-753abc9598a0" node scripts/test-transactions.js
+
+Environment variables:
+  NODE_API_BASE  - required, base URL of your Bolt app (no trailing slash)
+  NODE_USER_ID   - required, the user UUID to query
+  NODE_PAGE      - optional, default 1
+  NODE_PAGE_SIZE - optional, default 8
+  NODE_TYPE      - optional filter, e.g., "donation"
+Purpose:
+sends a GET request to your deployed Bolt app's /api/transactions endpoint, prints the HTTP status, parsed JSON, and a simple summary that confirms presence of type and entity_name fields.
+   */
 const API_BASE = process.env.NODE_API_BASE;
 const USER_ID = process.env.NODE_USER_ID;
 const PAGE = process.env.NODE_PAGE || '1';
@@ -63,3 +66,4 @@ async function run() {
 }
 
 run();
+// 69 lines --- Oct 20
