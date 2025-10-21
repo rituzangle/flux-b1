@@ -13,7 +13,7 @@ This single-file replacement reads the current transactions, looks up charities 
 'use client';
 import React from 'react';
 import Card from '@/src/components/ui/Card';
-import { runtimeStore } from '@/mocks/runtimeStore';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
 
 type RecentActivityProps = {
   transactions?: any[];
