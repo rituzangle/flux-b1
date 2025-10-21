@@ -10,8 +10,8 @@ import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
 import { Send as SendIcon } from 'lucide-react';
-import { runtimeStore } from '@/mocks/runtimeStore';
-import { logger } from '@/utils/prettyLogs';
+import { runtimeStore } from '@/src/mocks/runtimeStore';
+import { logger } from '@/src/utils/prettyLogs';
 
 export default function SendPage() {
   const router = useRouter();
@@ -104,5 +104,4 @@ export default function SendPage() {
     </main>
   );
 }
-
 /* 107 lines Oct 20 */
