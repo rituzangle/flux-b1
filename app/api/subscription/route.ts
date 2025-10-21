@@ -1,7 +1,9 @@
 // app/api/subscription/route.ts
+//create subscription payment or subscription record
+
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabaseClient';
-import { logger } from '@/utils/prettyLogs';
+import { supabase } from '@/src/lib/supabaseClient';
+import { logger } from '@/src/utils/prettyLogs';
 
 export const dynamic = 'force-dynamic';
 
