@@ -1,5 +1,5 @@
 -- 001_create_schema.sql
-
+-- added to supabase 
 -- Enable extensions commonly used for JSON and UUID generation
 create extension if not exists "pgcrypto";
 create extension if not exists "pg_trgm";
