@@ -6,54 +6,60 @@
  * - Returns { success, transaction, user }
  Update send route: create transaction + update balance
  */
+// app/api/send/route.ts
 import { NextResponse } from 'next/server';
-import { runtimeStore } from '@/src/mocks/runtimeStore';
+import { supabase } from '@/src/lib/supabaseClient';
 import { logger } from '@/src/utils/prettyLogs';
-import { buildTransaction, applyTransactionToStore } from '@/src/utils/transactions';
 
 export const dynamic = 'force-dynamic';
 
-type SendBody = { recipientId?: string; recipientName?: string; amount?: number | string; note?: string; userId?: string; };
+type Body = { userId: string; recipientId?: string; recipientName?: string; amount: number | string; note?: string };
+
+function toNum(v: any) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json().catch(() => null) as SendBody | null;
-    if (!body || typeof body.amount === 'undefined') {
-      logger.warn('send: invalid request body', 'send');
-      return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
-    }
+    const body = await req.json().catch(() => null) as Body | null;
+    if (!body || !body.userId) return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
 
-    const amount = Number(body.amount);
-    if (!Number.isFinite(amount) || amount <= 0) {
-      logger.warn('send: invalid amount', 'send');
-      return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
-    }
+    const amount = Math.max(0, toNum(body.amount));
+    if (amount <= 0) return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
 
-    const recipientName = body.recipientName ?? null;
-
-    const tx = buildTransaction({
+    const txRow = {
+      user_id: body.userId,
       type: 'send',
-      entityId: body.recipientId ?? null,
-      entityName: recipientName,
+      category: 'transfer',
+      entity_id: body.recipientId ?? null,
+      entity_name: body.recipientName ?? null,
       amount,
+      direction: 'outgoing',
       note: body.note ?? null,
-      meta: {},
-      userId: undefined,
-    });
+      meta: null,
+      insights: null,
+    };
 
-    const result = applyTransactionToStore(tx, runtimeStore);
+    const { data: txIns, error: txErr } = await supabase.from('transactions').insert(txRow).select().limit(1).single();
+    if (txErr) {
+      logger.error('send: tx insert failed ' + String(txErr), 'send');
+      return NextResponse.json({ ok: false, error: 'insert_failed' }, { status: 500 });
+    }
 
-    logger.info(`send: user ${result.user?.id ?? 'unknown'} sent $${tx.amount} to ${recipientName || body.recipientId}`, 'send');
+    // Update user balance (conservatively)
+    const { data: u } = await supabase.from('app_users').select('*').eq('id', body.userId).limit(1).single();
+    if (!u) return NextResponse.json({ ok: false, error: 'no_user' }, { status: 404 });
+    const newBalance = Math.max(0, Number(u.balance) - amount);
+    const { data: uu } = await supabase.from('app_users').update({ balance: newBalance }).eq('id', body.userId).select().limit(1).single();
 
-    return NextResponse.json({
-      ok: true,
-      user: { ...result.user },
-      tx,
-      recent: result.recent,
-    });
+    const { data: recent } = await supabase.from('transactions').select('*').eq('user_id', body.userId).order('timestamp', { ascending: false }).limit(8);
+
+    return NextResponse.json({ ok: true, user: uu, tx: txIns, recent });
   } catch (err) {
-    logger.error('send: unexpected error ' + String(err), 'send');
+    logger.error('send: unexpected ' + String(err), 'send');
     return NextResponse.json({ ok: false, error: 'server_error' }, { status: 500 });
   }
 }
+
 // --- 59 lines --- Oct 20, 2025
