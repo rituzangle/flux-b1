@@ -1,4 +1,4 @@
-// utils/prettyLogs.ts
+// src/utils/prettyLogs.ts
 /** Shared logging utility that’s:
 - Colorful for quick visual parsing
 - Includes line numbers to pinpoint issues
