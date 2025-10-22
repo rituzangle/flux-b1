@@ -17,13 +17,13 @@ function loadMockModule(): { mockList: Charity[] } {
   } catch (e1) {
     // Try relative path from project root CommonJS
     try {
-      const m2 = require('./src/mocks/charities');
+      const m2 = require('@/src/mocks/charities');
       const list2 = (m2 && (m2.mockCharities ?? m2.charities)) || [];
       return { mockList: list2 as Charity[] };
     } catch (e2) {
       // Try alternative relative path used by some workflows
       try {
-        const m3 = require('./mocks/charities');
+        const m3 = require('@/src//mocks/charities');
         const list3 = (m3 && (m3.mockCharities ?? m3.charities)) || [];
         return { mockList: list3 as Charity[] };
       } catch (e3) {
