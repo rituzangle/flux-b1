@@ -1,3 +1,4 @@
+// src/utils/types.ts
 export interface Charity {
   id: string;
   name: string;
