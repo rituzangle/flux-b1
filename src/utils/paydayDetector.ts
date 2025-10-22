@@ -1,4 +1,4 @@
-import { User, WWPromptMode } from './types';
+import { User, WWPromptMode } from '@/src/utils/types';
 
 export function isPaydayWindow(): boolean {
   const today = new Date();
