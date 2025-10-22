@@ -1,3 +1,5 @@
+// src/utils/paydayDetector.ts
+
 import { User, WWPromptMode } from '@/src/utils/types';
 
 export function isPaydayWindow(): boolean {
