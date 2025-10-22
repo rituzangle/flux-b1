@@ -1,0 +1,19 @@
+export async function POST(req: Request) {
+  try {
+    const body = await req.json().catch(() => null) as Body | null;
+    if (!body || !body.userId) return NextResponse.json({ ok: false, error: 'invalid_request' }, { status: 400 });
+
+    const amount = Math.max(0, toNum(body.amount));
+    if (amount <= 0) return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
+
+    // Resolve charity metadata to build insight and pass meta where helpful
+    let charity: any = null;
+    if (body.charityId) {
+      const { data: c, error: cErr } = await supabaseAdmin.from('charities').select('id,name,impact_rate,impact_metric').eq('id', body.charityId).maybeSingle();
+      if (cErr) {
+        // log and continue with null charity but do not fail the donation
+        console.warn('donate: failed to load charity metadata', cErr);
+      } else {
+        charity = c;
+      }
+    }
