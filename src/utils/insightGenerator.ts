@@ -7,7 +7,7 @@
  * - User behavior patterns (time of day, day of week)
  */
 
-import type { Charity, AIInsight } from './types';
+import type { Charity, AIInsight } from '@/src/types';
 
 /**
  * Generate 4 dynamic AI insights from a donation
