@@ -68,10 +68,8 @@ validation block: tries these sources (in order) to derive a userId for the dona
 */
 // Validate required fields / derive user id from server-side auth if missing
 async function extractUserIdFromRequest(req: Request, body: any): Promise<string | null> {
-  // 1) explicit body.userId
   if (body?.userId) return body.userId;
 
-  // 2) Authorization: Bearer <token>
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
   if (authHeader?.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.split(' ')[1];
@@ -83,7 +81,6 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
     }
   }
 
-  // 3) Inspect cookies for common Supabase access token names
   const cookieHeader = req.headers.get('cookie') || '';
   const parseCookie = (name: string) => {
     const match = cookieHeader.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
@@ -106,6 +103,7 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
 }
 
 const derivedUserId = await extractUserIdFromRequest(req, body);
+
 if (!body) {
   console.warn('donate: invalid_request - empty body');
   return NextResponse.json({ ok: false, error: 'invalid_request', details: 'empty_body' }, { status: 400 });
@@ -122,7 +120,6 @@ if (!derivedUserId) {
   return NextResponse.json({ ok: false, error: 'invalid_request', details: 'missing_userId_or_auth' }, { status: 401 });
 }
 
-// ensure we set body.userId for downstream code
 body.userId = body.userId ?? derivedUserId;
 
 if (body.amount === undefined || body.amount === null) {
@@ -135,6 +132,7 @@ if (amount <= 0) {
   console.warn('donate: invalid_amount', { amount: body.amount });
   return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
 }
+
 
     // Resolve charity metadata (non-blocking on failure)
     let charity: any = null;
