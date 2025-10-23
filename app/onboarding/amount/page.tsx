@@ -54,8 +54,8 @@ async function handleConfirm(e?: React.MouseEvent) {
   const token = sessionData?.session?.access_token;
   if (!token) {
     setError('You must sign in before donating.');
-    router.push('/');
-    //router.push('/signin'); // adjust to your sign-in route
+    const current = window.location.pathname + window.location.search;
+router.push(`/signin?redirectTo=${encodeURIComponent(current)}`);
     return;
   }
 
