@@ -47,18 +47,14 @@ export default function OnboardingAmountPage() {
 async function handleConfirm(e?: React.MouseEvent) {
   if (e && typeof e.preventDefault === 'function') e.preventDefault();
   setError(null);
-  if (!charityId) {
-    setError('No charity selected');
-    return;
-  }
+  if (!charityId) { setError('No charity selected'); return; }
 
   // Ensure user is signed in
   const { data: sessionData } = await supabaseBrowserClient.auth.getSession();
   const token = sessionData?.session?.access_token;
   if (!token) {
-    // show sign-in UI or redirect to sign-in page
     setError('You must sign in before donating.');
-    router.push('/signin'); // change to your sign-in route if different
+    router.push('/signin'); // adjust to your sign-in route
     return;
   }
 
@@ -66,10 +62,7 @@ async function handleConfirm(e?: React.MouseEvent) {
   try {
     const resp = await fetch('/api/donate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ charityId, amount, note }),
     });
     const json = await resp.json();
@@ -78,10 +71,8 @@ async function handleConfirm(e?: React.MouseEvent) {
       logger.warn('onboarding.amount: donate failed', 'onboarding');
       return;
     }
-
     try { localStorage.setItem('hasOnboarded', '1'); } catch {}
-    setAmount(22);
-    setNote('');
+    setAmount(22); setNote('');
     router.replace('/dashboard');
   } catch (err: any) {
     logger.error('onboarding.amount: unexpected error', 'onboarding', err);
@@ -90,7 +81,6 @@ async function handleConfirm(e?: React.MouseEvent) {
     setLoading(false);
   }
 }
-  
 
   return (
     <main className="max-w-3xl mx-auto p-6">
