@@ -13,7 +13,6 @@
 // app/api/donate/route.ts
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // if using auth-helpers
 export const dynamic = 'force-dynamic';
 
 type Body = {
