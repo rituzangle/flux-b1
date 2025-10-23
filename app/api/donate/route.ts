@@ -64,7 +64,6 @@ export async function POST(req: Request) {
 /*
 validation block: tries these sources (in order) to derive a userId for the donation RPC: 1) body.userId (explicit from client), 2) Authorization Bearer token, 3) Supabase access token in cookies (common cookie names). It calls the Supabase admin client to resolve the token to a user id and only fails if no user id can be found or the amount is missing/invalid.
 */
-// Validate required fields / derive user id from server-side auth if missing
 async function extractUserIdFromRequest(req: Request, body: any): Promise<string | null> {
   console.debug('supabase-js version:', require('@supabase/supabase-js/package.json').version);
 
