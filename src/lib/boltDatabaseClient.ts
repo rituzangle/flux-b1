@@ -40,12 +40,10 @@ export const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
 export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { persistSession: false },
 });
-
 // Export a convenience object with types
 const clients: Clients = {
   server: supabaseAdmin,
   client: supabaseClient,
 };
-
 export default clients;
-// --- 51 lines --- Oct 21
+// --- 49 lines --- Oct 21
