@@ -1,5 +1,6 @@
 // app/onboarding/amount/page.tsx
 'use client';
+import { supabaseClient } from '@/src/lib/boltDatabaseClient';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Input from '@/src/components/ui/Input';
