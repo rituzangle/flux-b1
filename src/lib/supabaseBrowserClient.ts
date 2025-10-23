@@ -1,6 +1,6 @@
 // src/lib/supabaseBrowserClient.ts
 // Browser-only Supabase client. Safe to import in 'use client' components.
-// Uses only NEXT_PUBLIC keys and will not throw if server-only env vars are missing.
+// Uses only NEXT_PUBLIC keys and will not throw error if server-only env vars are missing.
 
 import { createClient } from '@supabase/supabase-js';
 
