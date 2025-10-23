@@ -24,7 +24,12 @@ export default function SignInPage() {
     }
     setLoading(true);
     try {
-      const { error } = await supabaseBrowserClient.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin }});
+      // inside handleMagicLink in app/signin/page.tsx
+      const { error } = await supabaseBrowserClient.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: `${window.location.origin}/auth-callback` }
+      });
+
       if (error) {
         setError(error.message);
         logger.warn('signin: magic link send failed', 'auth', error);
