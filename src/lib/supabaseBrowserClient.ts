@@ -21,3 +21,4 @@ export const supabaseBrowserClient = createClient(SUPABASE_URL, SUPABASE_ANON_KE
 });
 
 export default supabaseBrowserClient;
+// --- 
