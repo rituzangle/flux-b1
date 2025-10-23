@@ -103,6 +103,22 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
 }
 
 const derivedUserId = await extractUserIdFromRequest(req, body);
+//-----------------------------------
+// Debug: show what auth surfaces were present and the derived id
+    console.debug('---------------------------';
+try {
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || null;
+  const cookieHeader = req.headers.get('cookie') || null;
+  console.debug('donate: debug authHeader present:', !!authHeader);
+  console.debug('donate: debug cookieHeader present:', !!cookieHeader);
+  // Do not print raw token in logs in prod; show masked preview for local debugging
+  const mask = (s: string | null) => s ? `${s.slice(0,6)}...${s.slice(-6)}` : null;
+  console.debug('donate: debug authHeader preview:', authHeader ? mask(authHeader) : null);
+  console.debug('donate: debug cookie preview (first 200 chars):', cookieHeader ? cookieHeader.slice(0,200) : null);
+  console.debug('donate: derivedUserId:', derivedUserId);
+} catch (e) {
+  console.warn('donate: debug logging failed', String(e));
+}
 
 if (!body) {
   console.warn('donate: invalid_request - empty body');
