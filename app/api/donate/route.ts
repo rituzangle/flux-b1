@@ -105,7 +105,7 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
 const derivedUserId = await extractUserIdFromRequest(req, body);
 //-----------------------------------
 // Debug: show what auth surfaces were present and the derived id
-    console.debug('---------------------------';
+    console.debug('---------------------------');
 try {
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization') || null;
   const cookieHeader = req.headers.get('cookie') || null;
