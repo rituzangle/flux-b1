@@ -3,7 +3,7 @@
 helper that is called from onboarding amount page when the user submits a donation. It reads the current Supabase auth user client-side, includes the id, and sends JSON with the correct Content-Type.
 */
 
-import { supabaseClient } from '@/lib/boltDatabaseClient';
+import { supabaseClient } from '@/src/lib/boltDatabaseClient';
 
 export async function submitDonation({ charityId, amount, note }: { charityId: string; amount: number; note?: string }) {
   // Get current logged-in user from Supabase client
