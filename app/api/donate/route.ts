@@ -73,7 +73,7 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
   if (authHeader?.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
       if (!userErr && userData?.user?.id) return userData.user.id;
     } catch (e) {
       console.warn('donate: getUser by bearer token failed', String(e));
@@ -91,7 +91,7 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
     const token = parseCookie(name);
     if (!token) continue;
     try {
-      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token);
       if (!userErr && userData?.user?.id) return userData.user.id;
     } catch (e) {
       console.warn(`donate: getUser from cookie ${name} failed`, String(e));
