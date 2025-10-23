@@ -1,8 +1,7 @@
-// app/onboarding/amount/page.tsx
 'use client';
-import { supabaseClient } from '@/src/lib/boltDatabaseClient';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { supabaseClient } from '@/src/lib/boltDatabaseClient';
 import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
@@ -19,17 +18,32 @@ export default function OnboardingAmountPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Reset to defaults whenever the selected charity changes
     setAmount(22);
     setNote('');
     setError(null);
     setLoading(false);
   }, [charityId]);
 
-  const handleBack = () => {
-    // Use replace so back after a navigation won't resubmit
-    router.back();
-  };
+  const handleBack = () => router.back();
+
+  async function submitDonation({ charityId, amount, note }: { charityId: string; amount: number; note?: string }) {
+    // Read access token from browser Supabase client and attach it as Bearer for the API route
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) throw new Error('no_auth_token');
+
+    const resp = await fetch('/api/donate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ charityId, amount, note: note ?? '' }),
+    });
+
+    const json = await resp.json();
+    return { resp, json };
+  }
 
   async function handleConfirm(e?: React.MouseEvent) {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -40,20 +54,16 @@ export default function OnboardingAmountPage() {
     }
     setLoading(true);
     try {
-      const resp = await fetch('/api/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ charityId, amount, note }),
-      });
-      const json = await resp.json();
+      const { resp, json } = await submitDonation({ charityId, amount, note });
       if (!resp.ok || !json?.ok) {
-        setError(json?.error || 'donation_failed');
+        const msg = json?.error || json?.details || 'donation_failed';
+        setError(msg);
         logger.warn('onboarding.amount: donate failed', 'onboarding');
         setLoading(false);
         return;
       }
 
-      // Apply response to runtimeStore (dev-only)
+      // Update runtimeStore (dev-only) if present
       try {
         if (runtimeStore && runtimeStore.user) {
           runtimeStore.user = { ...json.user };
@@ -63,15 +73,20 @@ export default function OnboardingAmountPage() {
         logger.debug('onboarding.amount: runtimeStore update skipped', 'onboarding');
       }
 
-      // Reset local form to defaults so Back/forward don't reuse previous values
+      // Persist onboarding completion (short-term client-side flag)
+      try {
+        localStorage.setItem('hasOnboarded', '1');
+      } catch {}
+
+      // Reset form
       setAmount(22);
       setNote('');
 
-      // Navigate to dashboard using replace to avoid leaving a page that can re-submit
+      // Replace navigation so back/forward won't re-submit
       router.replace('/dashboard');
-    } catch (err) {
-      setError(String(err));
-      logger.error('onboarding.amount: unexpected error', 'onboarding');
+    } catch (err: any) {
+      logger.error('onboarding.amount: unexpected error', 'onboarding', err);
+      setError(String(err?.message ?? err));
     } finally {
       setLoading(false);
     }
@@ -114,4 +129,4 @@ export default function OnboardingAmountPage() {
     </main>
   );
 }
-// --- 116 --- Oct 20
+// 132 lines --- Oct 23
