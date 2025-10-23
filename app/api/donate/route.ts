@@ -68,13 +68,13 @@ validation block: tries these sources (in order) to derive a userId for the dona
 */
 // Validate required fields / derive user id from server-side auth if missing
 async function extractUserIdFromRequest(req: Request, body: any): Promise<string | null> {
-  if (body?.userId) return body.userId;
+  console.debug('supabase-js version:', require('@supabase/supabase-js/package.json').version);
 
+  if (body?.userId) return body.userId;
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
   if (authHeader?.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.split(' ')[1];
     try {
-      // v2: validate an access token
       const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
       if (!userErr && userData?.user?.id) return userData.user.id;
     } catch (e) {
@@ -93,13 +93,12 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
     const token = parseCookie(name);
     if (!token) continue;
     try {
-      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token as any);
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
       if (!userErr && userData?.user?.id) return userData.user.id;
     } catch (e) {
       console.warn(`donate: getUser from cookie ${name} failed`, String(e));
     }
   }
-
   return null;
 }
 
