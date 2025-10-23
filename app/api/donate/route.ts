@@ -75,9 +75,8 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
     const token = authHeader.split(' ')[1];
     try {
       // v2: validate an access token
-const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
-if (!userErr && userData?.user?.id) return userData.user.id;
-
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser({ access_token: token });
+      if (!userErr && userData?.user?.id) return userData.user.id;
     } catch (e) {
       console.warn('donate: getUser by bearer token failed', String(e));
     }
