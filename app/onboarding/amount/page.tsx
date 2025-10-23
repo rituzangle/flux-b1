@@ -1,3 +1,7 @@
+/*
+app/onboarding/amount/page.tsx
+
+*/
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -129,4 +133,4 @@ export default function OnboardingAmountPage() {
     </main>
   );
 }
-// 132 lines --- Oct 23
+// 135 lines --- Oct 23
