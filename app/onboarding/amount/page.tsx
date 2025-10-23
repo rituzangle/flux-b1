@@ -1,11 +1,7 @@
-/*
-app/onboarding/amount/page.tsx
-
-*/
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabaseClient } from '@/src/lib/boltDatabaseClient';
+import supabaseBrowserClient from '@/src/lib/supabaseBrowserClient';
 import Input from '@/src/components/ui/Input';
 import Button from '@/src/components/ui/Button';
 import Card from '@/src/components/ui/Card';
@@ -31,8 +27,7 @@ export default function OnboardingAmountPage() {
   const handleBack = () => router.back();
 
   async function submitDonation({ charityId, amount, note }: { charityId: string; amount: number; note?: string }) {
-    // Read access token from browser Supabase client and attach it as Bearer for the API route
-    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const { data: sessionData } = await supabaseBrowserClient.auth.getSession();
     const token = sessionData?.session?.access_token;
     if (!token) throw new Error('no_auth_token');
 
@@ -67,7 +62,6 @@ export default function OnboardingAmountPage() {
         return;
       }
 
-      // Update runtimeStore (dev-only) if present
       try {
         if (runtimeStore && runtimeStore.user) {
           runtimeStore.user = { ...json.user };
@@ -77,16 +71,11 @@ export default function OnboardingAmountPage() {
         logger.debug('onboarding.amount: runtimeStore update skipped', 'onboarding');
       }
 
-      // Persist onboarding completion (short-term client-side flag)
-      try {
-        localStorage.setItem('hasOnboarded', '1');
-      } catch {}
+      try { localStorage.setItem('hasOnboarded', '1'); } catch {}
 
-      // Reset form
       setAmount(22);
       setNote('');
 
-      // Replace navigation so back/forward won't re-submit
       router.replace('/dashboard');
     } catch (err: any) {
       logger.error('onboarding.amount: unexpected error', 'onboarding', err);
@@ -133,4 +122,4 @@ export default function OnboardingAmountPage() {
     </main>
   );
 }
-// 135 lines --- Oct 23
+// 125 lines --- Oct 23
