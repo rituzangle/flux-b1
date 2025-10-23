@@ -64,10 +64,11 @@ export async function POST(req: Request) {
 /*
 validation block: tries these sources (in order) to derive a userId for the donation RPC: 1) body.userId (explicit from client), 2) Authorization Bearer token, 3) Supabase access token in cookies (common cookie names). It calls the Supabase admin client to resolve the token to a user id and only fails if no user id can be found or the amount is missing/invalid.
 */
+// inside POST, right after the body is parsed and validated as JSON
+// derive user id from request (supports body.userId, Bearer token, cookies)
 async function extractUserIdFromRequest(req: Request, body: any): Promise<string | null> {
-  console.debug('supabase-js version:', require('@supabase/supabase-js/package.json').version);
-
   if (body?.userId) return body.userId;
+
   const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
   if (authHeader?.toLowerCase().startsWith('bearer ')) {
     const token = authHeader.split(' ')[1];
@@ -96,9 +97,11 @@ async function extractUserIdFromRequest(req: Request, body: any): Promise<string
       console.warn(`donate: getUser from cookie ${name} failed`, String(e));
     }
   }
+
   return null;
 }
 
+// call extractUserIdFromRequest(..) inside the POST handler, after parsing body
 const derivedUserId = await extractUserIdFromRequest(req, body);
 //-----------------------------------
 // Debug: show what auth surfaces were present and the derived id
