@@ -10,7 +10,6 @@
 - uses the shared Supabase client at src/lib/supabaseClient.ts.
 - uses server-side service role key via src/lib/supabaseClient.ts.
 */
-// app/api/donate/route.ts
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
 export const dynamic = 'force-dynamic';
