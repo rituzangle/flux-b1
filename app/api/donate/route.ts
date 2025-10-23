@@ -1,25 +1,19 @@
 // app/api/donate/route.ts
 /* 
-validates input,
-
-resolves the charity row to read impact_rate and name,
-
-calls the atomic_apply_donation RPC,
-
-builds a contextual insight based on amount and impact_rate when the RPC returns,
-
-returns { ok, rpc, recent } where rpc contains the RPC result and insight is added if missing,
-
-logs minimal warnings through structured console statements (adapt to prettyLogs if you prefer).
-
-calls the Postgres RPC public.atomic_apply_donation, returns the RPC JSON, and returns recent transactions for the user. It expects your Supabase client at src/lib/supabaseClient.ts and the service role key set in Bolt environment.
-uses the shared Supabase client at src/lib/supabaseClient.ts.
-uses server-side service role key via src/lib/supabaseClient.ts.
+- validates input, 
+-resolves the charity row to read impact_rate and name, 
+-calls the atomic_apply_donation RPC,
+- builds a contextual insight based on amount and impact_rate when the RPC returns,
+- returns { ok, rpc, recent } where rpc contains the RPC result and insight is added if missing,
+- logs minimal warnings through structured console statements (adapt to prettyLogs if you prefer).
+- calls the Postgres RPC public.atomic_apply_donation, returns the RPC JSON, and returns recent transactions for the user. It expects your Supabase client at src/lib/supabaseClient.ts and the service role key set in Bolt environment.
+- uses the shared Supabase client at src/lib/supabaseClient.ts.
+- uses server-side service role key via src/lib/supabaseClient.ts.
 */
 // app/api/donate/route.ts
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
-
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'; // if using auth-helpers
 export const dynamic = 'force-dynamic';
 
 type Body = {
@@ -69,17 +63,78 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'invalid_request', details: 'malformed_json' }, { status: 400 });
     }
 
-    // Validate required fields
-    if (!body || !body.userId || (body.amount === undefined || body.amount === null)) {
-      console.warn('donate: invalid_request - missing userId or amount', body);
-      return NextResponse.json({ ok: false, error: 'invalid_request', details: 'missing_userId_or_amount' }, { status: 400 });
-    }
+/*
+validation block: tries these sources (in order) to derive a userId for the donation RPC: 1) body.userId (explicit from client), 2) Authorization Bearer token, 3) Supabase access token in cookies (common cookie names). It calls the Supabase admin client to resolve the token to a user id and only fails if no user id can be found or the amount is missing/invalid.
+*/
+// Validate required fields / derive user id from server-side auth if missing
+async function extractUserIdFromRequest(req: Request, body: any): Promise<string | null> {
+  // 1) explicit body.userId
+  if (body?.userId) return body.userId;
 
-    const amount = Math.max(0, toNum(body.amount));
-    if (amount <= 0) {
-      console.warn('donate: invalid_amount', { amount: body.amount });
-      return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
+  // 2) Authorization: Bearer <token>
+  const authHeader = req.headers.get('authorization') || req.headers.get('Authorization');
+  if (authHeader?.toLowerCase().startsWith('bearer ')) {
+    const token = authHeader.split(' ')[1];
+    try {
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token as any);
+      if (!userErr && userData?.user?.id) return userData.user.id;
+    } catch (e) {
+      console.warn('donate: getUser by bearer token failed', String(e));
     }
+  }
+
+  // 3) Inspect cookies for common Supabase access token names
+  const cookieHeader = req.headers.get('cookie') || '';
+  const parseCookie = (name: string) => {
+    const match = cookieHeader.split(';').map(s => s.trim()).find(s => s.startsWith(name + '='));
+    if (!match) return null;
+    return decodeURIComponent(match.split('=')[1]);
+  };
+  const possibleNames = ['sb-access-token', 'supabase-auth-token', 'supabase_session', 'sb:token'];
+  for (const name of possibleNames) {
+    const token = parseCookie(name);
+    if (!token) continue;
+    try {
+      const { data: userData, error: userErr } = await supabaseAdmin.auth.getUser(token as any);
+      if (!userErr && userData?.user?.id) return userData.user.id;
+    } catch (e) {
+      console.warn(`donate: getUser from cookie ${name} failed`, String(e));
+    }
+  }
+
+  return null;
+}
+
+const derivedUserId = await extractUserIdFromRequest(req, body);
+if (!body) {
+  console.warn('donate: invalid_request - empty body');
+  return NextResponse.json({ ok: false, error: 'invalid_request', details: 'empty_body' }, { status: 400 });
+}
+
+if (!derivedUserId) {
+  console.warn('donate: invalid_request - missing userId and no valid auth token found', {
+    parsedBody: body,
+    headersPreview: {
+      authorization: !!req.headers.get('authorization'),
+      cookie: !!req.headers.get('cookie'),
+    },
+  });
+  return NextResponse.json({ ok: false, error: 'invalid_request', details: 'missing_userId_or_auth' }, { status: 401 });
+}
+
+// ensure we set body.userId for downstream code
+body.userId = body.userId ?? derivedUserId;
+
+if (body.amount === undefined || body.amount === null) {
+  console.warn('donate: invalid_request - missing amount', body);
+  return NextResponse.json({ ok: false, error: 'invalid_request', details: 'missing_amount' }, { status: 400 });
+}
+
+const amount = Math.max(0, toNum(body.amount));
+if (amount <= 0) {
+  console.warn('donate: invalid_amount', { amount: body.amount });
+  return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
+}
 
     // Resolve charity metadata (non-blocking on failure)
     let charity: any = null;
