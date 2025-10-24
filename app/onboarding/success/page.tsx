@@ -1,5 +1,6 @@
-// app/onboarding/success/page.tsx
-// Server wrapper: safely accepts searchParams and passes serialized props to a client subcomponent.
+/* app/onboarding/success/page.tsx
+   Server wrapper: accepts searchParams and passes serialized props to ClientSuccess component.
+*/
 import React from 'react';
 import ClientSuccess from './ClientSuccess';
 
