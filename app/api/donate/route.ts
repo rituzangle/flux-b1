@@ -171,7 +171,7 @@ export async function POST(req: Request) {
       console.warn('donate: invalid_amount', { amount: body.amount });
       return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
     }
-
+// --- charity time ---
     // Resolve charity metadata (non-blocking on failure)
     let charity: any = null;
     if (body.charityId) {
