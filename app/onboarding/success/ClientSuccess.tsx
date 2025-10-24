@@ -1,3 +1,5 @@
+'use client';
+
 // app/onboarding/success/page.tsx
 // Server wrapper: safely accepts searchParams and passes serialized props to a client subcomponent.
 import React from 'react';
