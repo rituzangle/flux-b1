@@ -12,6 +12,7 @@
 // 'use server';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/src/lib/boltDatabaseClient';
+import { charities as mockCharities } from '@/src/mocks/charities';
 export const dynamic = 'force-dynamic';
 
 type Body = {
