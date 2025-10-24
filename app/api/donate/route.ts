@@ -172,34 +172,82 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: false, error: 'invalid_amount' }, { status: 400 });
     }
 // --- charity time ---
-    // Resolve charity metadata (non-blocking on failure)
-    let charity: any = null;
-    if (body.charityId) {
-      try {
-        const { data: c, error: cErr } = await supabaseAdmin
-          .from('charities')
-          .select('id,name,impact_rate,impact_metric')
-          .eq('id', body.charityId)
-          .maybeSingle();
-        if (cErr) {
-          console.warn('donate: failed to load charity metadata', cErr);
-        } else if (c) {
-          charity = c;
-        }
-      } catch (e) {
-        console.warn('donate: error fetching charity metadata', String(e));
+// Resolve charity metadata (non-blocking on failure)
+// Accept either a UUID or a slug-like id (e.g., "charity-4"), and fall back to local mocks in dev.
+import { charities as mockCharities } from '@/src/mocks/charities';
+
+let charity: any = null;
+let charityUuid: string | null = null;
+
+if (body.charityId) {
+  try {
+    // If the incoming id looks like a UUID, try direct id lookup
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(body.charityId);
+    if (isUuid) {
+      const { data: c, error: cErr } = await supabaseAdmin
+        .from('charities')
+        .select('id,name,impact_rate,impact_metric')
+        .eq('id', body.charityId)
+        .maybeSingle();
+
+      if (cErr) {
+        console.warn('donate: failed to load charity metadata by id', cErr);
+      } else if (c) {
+        charity = c;
+        charityUuid = c.id;
+      }
+    } else {
+      // Non-UUID: lookup by slug only to avoid Postgres uuid parse errors
+      const { data: s, error: sErr } = await supabaseAdmin
+        .from('charities')
+        .select('id,name,impact_rate,impact_metric')
+        .eq('slug', body.charityId)
+        .limit(1)
+        .maybeSingle();
+
+      if (sErr) {
+        console.warn('donate: failed to load charity metadata by slug', sErr);
+      } else if (s) {
+        charity = s;
+        charityUuid = s.id;
       }
     }
 
-    // Prepare RPC params
-    const rpcParams = {
-      p_user_id: body.userId,
-      p_charity_id: body.charityId ?? null,
-      p_amount: amount,
-      p_note: body.note ?? null,
-      p_meta: body.meta ?? (charity ? { impactRate: charity.impact_rate, impactMetric: charity.impact_metric } : null),
-    };
+    // If DB lookup didn't resolve anything, try the local mocks (dev-safe fallback)
+    if (!charity && !charityUuid) {
+      const mock = mockCharities.find((c) => c.id === body.charityId || (c as any).slug === body.charityId || c.name === body.charityId);
+      if (mock) {
+        charity = {
+          id: mock.id,
+          name: mock.name,
+          impact_rate: mock.impactRate ?? mock.impactRate ?? mock.impactRate ?? mock.impactRate ?? mock.impactRate ?? (mock as any).impactRate ?? mock.impactRate ?? undefined,
+          impact_metric: mock.impactMetric ?? mock.impactMetric ?? mock.impactMetric ?? undefined,
+        };
+        charityUuid = mock.id;
+        console.info('donate: resolved charity from local mock', charityUuid);
+      } else {
+        console.info('donate: no charity metadata found for', body.charityId);
+      }
+    }
+  } catch (e) {
+    console.warn('donate: error fetching charity metadata', String(e));
+  }
+}
 
+// Prepare RPC params
+const rpcParams = {
+  p_user_id: body.userId,
+  p_charity_id: charityUuid ?? (isUuidString(body?.charityId) ? body.charityId : null),
+  p_amount: amount,
+  p_note: body.note ?? null,
+  p_meta: body.meta ?? (charity ? { impactRate: charity.impact_rate, impactMetric: charity.impact_metric } : null),
+};
+
+// helper used above: safe UUID check function
+function isUuidString(v: any): v is string {
+  return typeof v === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(v);
+}
+    
     // Call RPC
     const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('atomic_apply_donation', rpcParams as any);
 
