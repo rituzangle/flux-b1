@@ -3,7 +3,7 @@
  * Onboarding flow - Step 3: Success Screen with AI Insights
  * Shows donation confirmation and AI-generated insights.
  */
-'use client';
+//'use client';
 
 import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
